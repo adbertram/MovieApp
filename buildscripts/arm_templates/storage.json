@@ -1,0 +1,81 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName": {
+            "type": "string"
+        },
+        "containerName": {
+            "type": "string"
+        },
+        "storageAccountType": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_ZRS",
+                "Premium_LRS"
+            ],
+            "metadata": {
+                "description": "Storage Account type"
+            }
+        },
+        "signedExpirySasToken": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "sasTokenProperties": {
+            "signedServices": "b",
+            "signedPermission": "r",
+            "signedExpiry": "[parameters('signedExpirySasToken')]",
+            "signedResourceTypes": "o"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-04-01",
+            "name": "[parameters('storageAccountName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('storageAccountType')]"
+            },
+            "kind": "StorageV2",
+            "properties": {
+            },
+            "resources": [
+                {
+                    "name": "[concat('default/', parameters('containerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2019-04-01",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccountName'))]"
+                    ]
+                }
+            ]
+        }
+    ],
+    "outputs": {
+        "storageAccountResourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+        },
+        "storageAccountKey": {
+            "type": "string",
+            "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
+        },
+        "sasToken": {
+            "type": "string",
+            "value": "[listAccountSas(parameters('storageAccountName'), '2019-04-01', variables('sasTokenProperties')).accountSasToken]"
+        },
+        "setupScriptContainerName": {
+            "type": "string",
+            "value": "[parameters('containerName')]"
+        },
+        "storageAccountName": {
+            "type": "string",
+            "value": "[parameters('storageAccountName')]"
+        }
+    }
+}

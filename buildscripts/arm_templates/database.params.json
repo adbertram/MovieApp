@@ -1,0 +1,25 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sqlServerName": {
+            "value": "MovieApp"
+        },
+        "adminUsername": {
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/1427e7fb-a488-4ec5-be44-30ac10ca2e95/resourceGroups/MovieApp/providers/Microsoft.KeyVault/vaults/MovieApp-KV"
+                },
+                "secretName": "SqlAdminUsername"
+            }
+        },
+        "adminPassword": {
+            "reference": {
+                "keyVault": {
+                    "id": "/subscriptions/1427e7fb-a488-4ec5-be44-30ac10ca2e95/resourceGroups/MovieApp/providers/Microsoft.KeyVault/vaults/MovieApp-KV"
+                },
+                "secretName": "SqlAdminPassword"
+            }
+        }
+    }
+}
