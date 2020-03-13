@@ -8,6 +8,9 @@
                 "description": "Enter a globally unique hostname for your SQL server"
             }
         },
+        "sqlDbName": {
+            "type": "string"
+        },
         "adminUserName": {
             "type": "string",
             "metadata": {
@@ -53,13 +56,10 @@
             ]
         },
         {
-            "name": "[concat(parameters('sqlServerName'), '/AppDb')]",
+            "name": "[concat(parameters('sqlServerName'), '/',parameters('sqlDbName'))]",
             "type": "Microsoft.Sql/servers/databases",
             "apiVersion": "2014-04-01",
             "location": "[resourceGroup().location]",
-            "tags": {
-                "displayName": "AppDb"
-            },
             "dependsOn": [
                 "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]"
             ],
