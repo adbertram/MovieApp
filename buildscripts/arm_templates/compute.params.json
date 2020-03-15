@@ -20,6 +20,12 @@
         "loadBalancerBackendPoolName": {
             "value": ""
         },
+        "availabilitySetName": {
+            "value": ""
+        },
+        "availSetVmInstanceCount": {
+            "value": ""
+        },
         "adminUsername": {
             "reference": {
                 "keyVault": {
