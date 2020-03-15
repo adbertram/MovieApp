@@ -64,7 +64,7 @@ stages:
               targetType: "inline"
               script: |
                 $output = $Env:network_arm | ConvertFrom-Json
-                $vars = 'subnetName','virtualNetworkName','loadBalancerName','loadBalancerBackendPoolName','publicDnsName'
+                $vars = 'subnetName','virtualNetworkName','loadBalancerName','loadBalancerBackendPoolName','publicDnsName','availablitySetName','availSetVmInstanceCount'
                 $vars | foreach {
                   echo "##vso[task.setvariable variable=$_;isOutput=true]$($output.$_.value)"
                 }
@@ -120,6 +120,8 @@ stages:
           virtualNetworkName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.virtualNetworkName'] ]
           loadBalancerName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.loadBalancerName'] ]
           loadBalancerBackendPoolName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.loadBalancerBackendPoolName'] ]
+          availablitySetName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.availablitySetName'] ]
+          availSetVmInstanceCount: $[ dependencies.Network.outputs['ParseNetworkARMOutput.availSetVmInstanceCount'] ]
         steps:
           - task: AzureResourceManagerTemplateDeployment@3
             name: "Compute"
@@ -132,7 +134,7 @@ stages:
               templateLocation: "Linked artifact"
               csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/compute.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/compute.params.json"
-              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName)"
+              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -availablitySetName $(availablitySetName) -availSetVmInstanceCount $(availSetVmInstanceCount)"
               deploymentMode: "Incremental"
               deploymentOutputs: compute_arm
           - task: PowerShell@2
@@ -141,7 +143,7 @@ stages:
               targetType: "inline"
               script: |
                 $output = $Env:compute_arm | ConvertFrom-Json
-                $vars = 'vmName'
+                $vars = 'vmNames'
                 $vars | foreach {
                   write-output $output.$_.value
                   echo "##vso[task.setvariable variable=$_;isOutput=true]$($output.$_.value)"
@@ -190,7 +192,7 @@ stages:
           setupScriptContainerName: $[ dependencies.Storage.outputs['ParseStorageARMOutput.setupScriptContainerName'] ]
           sasToken: $[ dependencies.Storage.outputs['ParseStorageARMOutput.sasToken'] ]
           storageAccountKey: $[ dependencies.Storage.outputs['ParseStorageARMOutput.storageAccountKey'] ]
-          vmName: $[ dependencies.Compute.outputs['ParseComputeARMOutput.vmName'] ]
+          vmNames: $[ dependencies.Compute.outputs['ParseComputeARMOutput.vmNames'] ]
         steps:
           - task: AzurePowerShell@5
             displayName: "Package up DSC script"
@@ -210,7 +212,7 @@ stages:
               scriptLocation: "inlineScript"
               inlineScript: 'az storage blob upload --container-name $(setupScriptContainerName) --file "$(System.DefaultWorkingDirectory)/buildscripts/iis_setup.zip" --name iis_setup.zip --account-name $(storageAccountName) --account-key $(storageAccountKey)'
           - task: AzureResourceManagerTemplateDeployment@3
-            name: "WebAppARMDeployment"
+            name: "IIS"
             inputs:
               azureResourceManagerConnection: "ARM"
               subscriptionId: "$(subscription_id)"
@@ -220,7 +222,7 @@ stages:
               templateLocation: "Linked artifact"
               csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/iis.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/iis.params.json"
-              overrideParameters: "-vmName $(vmName) -storageAccountName $(storageAccountName) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken)"
+              overrideParameters: "-vmNames $(vmNames) -storageAccountName $(storageAccountName) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken)"
               deploymentMode: "Incremental"
       - job: InfrastructureTesting
         dependsOn:

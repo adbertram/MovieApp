@@ -14,9 +14,6 @@
         "subnetName": {
             "value": ""
         },
-        "vmName": {
-            "value": "appsrv"
-        },
         "loadBalancerName": {
             "value": ""
         },

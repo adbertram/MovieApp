@@ -48,13 +48,20 @@
         "subnetName": {
             "type": "string"
         },
-        "vmName": {
-            "type": "string"
+        "vmNamePrefix": {
+            "type": "string",
+            "defaultValue": "MovieApp-"
         },
         "loadBalancerName": {
             "type": "string"
         },
         "loadBalancerBackendPoolName": {
+            "type": "string"
+        },
+        "availabilitySetName": {
+            "type": "string"
+        },
+        "availSetVmInstanceCount": {
             "type": "string"
         }
     },
@@ -67,14 +74,18 @@
             "version": "latest"
         },
         "imageReference": "[variables('osType')]",
-        "nicName": "[parameters('vmName')]"
+        "nicNamePrefix": "[parameters('vmNamePrefix')]"
     },
     "resources": [
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2018-11-01",
-            "name": "[variables('nicName')]",
+            "name": "[concat(variables('nicNamePrefix'), copyindex())]",
             "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "nicLoop",
+                "count": "[parameters('availSetVmInstanceCount')]"
+            },
             "dependsOn": [
             ],
             "properties": {
@@ -99,17 +110,24 @@
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2018-10-01",
-            "name": "[parameters('vmName')]",
             "location": "[resourceGroup().location]",
+            "name": "[concat(parameters('vmNamePrefix'), copyindex())]",
+            "copy": {
+                "name": "virtualMachineLoop",
+                "count": "[parameters('availSetVmInstanceCount')]"
+            },
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicNamePrefix'), copyindex())]"
             ],
             "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('availabilitySetName'))]"
+                },
                 "hardwareProfile": {
                     "vmSize": "[parameters('vmSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[parameters('vmName')]",
+                    "computerName": "[concat(parameters('vmNamePrefix'), copyIndex())]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]"
                 },
@@ -122,7 +140,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicNamePrefix'),copyindex()))]"
                         }
                     ]
                 }
@@ -130,8 +148,8 @@
         }
     ],
     "outputs": {
-        "vmName": {
-            "value": "[parameters('vmName')]",
+        "vmNames": {
+            "value": "[concat(parameters('vmNamePrefix'), copyindex())]",
             "type": "string"
         }
     }

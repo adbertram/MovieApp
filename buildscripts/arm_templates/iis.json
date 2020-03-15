@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "vmName": {
+        "vmNames": {
             "defaultValue": "",
             "type": "String"
         },
@@ -29,7 +29,7 @@
         {
             "apiVersion": "2017-03-30",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[parameters('vmName')]",
+            "name": "[parameters('vmNames')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
             ],
@@ -42,7 +42,7 @@
                     "location": "[resourceGroup().location]",
                     "apiVersion": "2015-05-01-preview",
                     "dependsOn": [
-                        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+                        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNames'))]"
                     ],
                     "properties": {
                         "publisher": "Microsoft.Powershell",
