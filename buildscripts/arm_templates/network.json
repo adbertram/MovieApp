@@ -34,8 +34,7 @@
             "location": "[resourceGroup().location]",
             "properties": {
                 "platformFaultDomainCount": "[variables('availSetVmInstanceCount')]",
-                "platformUpdateDomainCount": "[variables('availSetVmInstanceCount')]",
-                "managed": true
+                "platformUpdateDomainCount": "[variables('availSetVmInstanceCount')]"
             }
         },
         {
