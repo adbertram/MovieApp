@@ -24,7 +24,7 @@
         "loadBalancerRuleName": "HTTPLBRule",
         "lbProbeName": "[parameters('projectName')]",
         "availabilitySetName": "movieappavailset",
-        "availSetVmInstanceCount": 2
+        "availSetVmInstanceCount": "2"
     },
     "resources": [
         {
