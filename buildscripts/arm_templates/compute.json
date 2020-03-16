@@ -62,7 +62,7 @@
             "type": "string"
         },
         "availSetVmInstanceCount": {
-            "type": "string"
+            "type": "int"
         }
     },
     "variables": {

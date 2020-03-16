@@ -134,7 +134,7 @@ stages:
               templateLocation: "Linked artifact"
               csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/compute.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/compute.params.json"
-              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -availabilitySetName $(availabilitySetName) -availSetVmInstanceCount $(availSetVmInstanceCount)"
+              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -availabilitySetName $(availabilitySetName) -availSetVmInstanceCount [int]$(availSetVmInstanceCount)"
               deploymentMode: "Incremental"
               deploymentOutputs: compute_arm
           - task: PowerShell@2
