@@ -50,6 +50,9 @@
         },
         "sasToken": {
             "value": ""
+        },
+        "iisDSCSetupArchiveFileName": {
+            "value": "iis_setup.zip"
         }
     }
 }
