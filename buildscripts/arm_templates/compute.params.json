@@ -23,9 +23,7 @@
         "availabilitySetName": {
             "value": ""
         },
-        "availSetVmInstanceCount": {
-            "value": ""
-        },
+        "availSetVmInstanceCount": {},
         "adminUsername": {
             "reference": {
                 "keyVault": {
