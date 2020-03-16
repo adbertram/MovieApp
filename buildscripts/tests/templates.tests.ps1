@@ -10,6 +10,8 @@ param(
 )
 
 foreach ($type in $ResourceType) {
+
+    ## Find the ARM template for that particular reasource type and it's parmaeter file
     $templateFilePath = "$env:System_DefaultWorkingDirectory\buildscripts\arm_templates\$type.json"
     $parameterFilePath = "$env:System_DefaultWorkingDirectory\buildscripts\arm_templates\$type.params.json"
 
