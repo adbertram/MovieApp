@@ -111,7 +111,7 @@ stages:
               pwsh: true
       - job: Compute
         pool:
-          vmImage: "windows-latest"
+          vmImage: "windows-latest" ## Only needed because of Publish-AzVMDscConfiguration
         dependsOn:
           - Network
           - TemplateTests
@@ -131,6 +131,7 @@ stages:
               azureSubscription: "ARM"
               ScriptType: "InlineScript"
               Inline: |
+                gci $env:\
                 Install-Module xPSDesiredStateConfiguration -Force
                 Publish-AzVMDscConfiguration "$(System.DefaultWorkingDirectory)\buildscripts\iis_setup.ps1" -OutputArchivePath "$(System.DefaultWorkingDirectory)\buildscripts\iis_setup.zip"
               FailOnStandardError: true
