@@ -205,7 +205,6 @@ stages:
           - Storage
           - Compute
           - Database
-          - IIS
           - TemplateTests
         pool:
           vmImage: "windows-latest"
