@@ -135,7 +135,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2018-10-01",
             "location": "[resourceGroup().location]",
-            "name": "[variables('vms').names[copyIndex()].name]",
+            "name": "[variables('vms').names[copyIndex()].names]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/availabilitySets',parameters('availabilitySetName'))]"
             ],
