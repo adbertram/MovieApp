@@ -115,6 +115,7 @@ stages:
         dependsOn:
           - Network
           - TemplateTests
+          - Storage
         variables:
           subnetName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.subnetName'] ]
           virtualNetworkName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.virtualNetworkName'] ]
@@ -131,7 +132,6 @@ stages:
               azureSubscription: "ARM"
               ScriptType: "InlineScript"
               Inline: |
-                gci $env:\
                 Install-Module xPSDesiredStateConfiguration -Force
                 Publish-AzVMDscConfiguration "$(System.DefaultWorkingDirectory)\buildscripts\iis_setup.ps1" -OutputArchivePath "$(System.DefaultWorkingDirectory)\buildscripts\iis_setup.zip"
               FailOnStandardError: true
