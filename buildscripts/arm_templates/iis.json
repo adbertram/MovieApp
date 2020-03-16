@@ -4,7 +4,7 @@
     "parameters": {
         "vmNames": {
             "defaultValue": "",
-            "type": "String"
+            "type": "array"
         },
         "storageAccountName": {
             "defaultValue": "",
@@ -33,6 +33,10 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
             ],
+            "copy": {
+                "name": "vmCopy",
+                "count": "[parameters('vmNames').count]"
+            },
             "properties": {
             },
             "resources": [
