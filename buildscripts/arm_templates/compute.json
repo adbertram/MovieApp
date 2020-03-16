@@ -78,10 +78,10 @@
         "vms": {
             "copy": [
                 {
-                    "name": "names",
+                    "name": "vmnames",
                     "count": "[parameters('availSetVmInstanceCount')]",
                     "input": {
-                        "name": "[concat(parameters('vmNamePrefix'), copyindex())]"
+                        "name": "[concat(parameters('vmNamePrefix'), string(copyindex('vmnames')))]"
                     }
                 }
             ]
@@ -135,7 +135,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2018-10-01",
             "location": "[resourceGroup().location]",
-            "name": "[variables('vms').names[copyIndex()].names]",
+            "name": "[variables('vms').vmnames[copyIndex()].name]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/availabilitySets',parameters('availabilitySetName'))]"
             ],
@@ -169,7 +169,7 @@
     ],
     "outputs": {
         "vmNames": {
-            "value": "[variables('vms').names]",
+            "value": "[variables('vms').vmnames]",
             "type": "array"
         }
     }
