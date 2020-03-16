@@ -106,8 +106,8 @@ stages:
                 $output = $Env:storage_arm | ConvertFrom-Json
                 $vars = 'storageAccountName','setupScriptContainerName','sasToken','storageAccountKey'
                 $vars | foreach {
-                  write-output $output.($_.value)
-                  echo "##vso[task.setvariable variable=$_;isOutput=true]$($output.($_.value))"
+                  write-output $output.($_)
+                  echo "##vso[task.setvariable variable=$_;isOutput=true]$($output.($_)))"
                 }
               pwsh: true
       - job: Compute
