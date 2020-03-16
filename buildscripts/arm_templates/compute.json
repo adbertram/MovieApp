@@ -139,6 +139,10 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/availabilitySets',parameters('availabilitySetName'))]"
             ],
+            "copy": {
+                "name": "vmnameCopy",
+                "count": "[parameters('availSetVmInstanceCount')]"
+            },
             "properties": {
                 "availabilitySet": {
                     "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('availabilitySetName'))]"
