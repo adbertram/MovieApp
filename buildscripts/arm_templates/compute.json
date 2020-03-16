@@ -132,7 +132,7 @@
                 "count": "[parameters('availSetVmInstanceCount')]"
             },
             "dependsOn": [
-                ""
+                "[resourceId('Microsoft.Compute/availabilitySets',parameters('availabilitySetName'))]"
             ],
             "properties": {
                 "availabilitySet": {
