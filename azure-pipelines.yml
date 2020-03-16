@@ -141,7 +141,7 @@ stages:
               azureSubscription: "ARM"
               scriptType: "pscore"
               scriptLocation: "inlineScript"
-              inlineScript: 'az storage blob upload --container-name "$(setupScriptContainerName)" --file "$(System.DefaultWorkingDirectory)/buildscripts/iis_setup.zip" --name iis_setup.zip --account-name "$(storageAccountName)" --account-key "$(storageAccountKey)"'
+              inlineScript: 'az storage blob upload --container-name "envsetupscripts" --file "$(System.DefaultWorkingDirectory)/buildscripts/iis_setup.zip" --name iis_setup.zip --account-name "$(storageAccountName)" --account-key "$(storageAccountKey)"'
           - task: AzureResourceManagerTemplateDeployment@3
             name: "Compute"
             inputs:
