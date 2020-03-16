@@ -21,9 +21,11 @@
             "value": ""
         },
         "availabilitySetName": {
-            "value": ""
+            "value": "movieappavailset"
         },
-        "availSetVmInstanceCount": {},
+        "availSetVmInstanceCount": {
+            "value": 2
+        },
         "adminUsername": {
             "reference": {
                 "keyVault": {

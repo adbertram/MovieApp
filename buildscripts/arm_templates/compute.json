@@ -74,19 +74,17 @@
             "version": "latest"
         },
         "imageReference": "[variables('osType')]",
-        "nicNamePrefix": "[parameters('vmNamePrefix')]",
-        "availabilitySetName": "movieappavailset",
-        "availSetVmInstanceCount": "2"
+        "nicNamePrefix": "[parameters('vmNamePrefix')]"
     },
     "resources": [
         {
             "type": "Microsoft.Compute/availabilitySets",
-            "name": "[variables('availabilitySetName')]",
+            "name": "[parameters('availabilitySetName')]",
             "apiVersion": "2019-07-01",
             "location": "[resourceGroup().location]",
             "properties": {
-                "platformFaultDomainCount": "[variables('availSetVmInstanceCount')]",
-                "platformUpdateDomainCount": "[variables('availSetVmInstanceCount')]"
+                "platformFaultDomainCount": "[parameters('availSetVmInstanceCount')]",
+                "platformUpdateDomainCount": "[parameters('availSetVmInstanceCount')]"
             },
             "sku": {
                 "name": "Aligned"
