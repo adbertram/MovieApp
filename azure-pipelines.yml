@@ -220,7 +220,7 @@ stages:
               templateLocation: "Linked artifact"
               csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/iis.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/iis.params.json"
-              overrideParameters: "-vmNames $(vmNames) -storageAccountName $(storageAccountName) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken)"
+              overrideParameters: "-vmNames '$(vmNames)'.split(',') -storageAccountName $(storageAccountName) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken)"
               deploymentMode: "Incremental"
       - job: InfrastructureTesting
         dependsOn:
