@@ -160,7 +160,6 @@ stages:
         pool:
           vmImage: "windows-latest"
         dependsOn:
-          - Storage
           - TemplateTests
         steps:
           - task: AzureResourceManagerTemplateDeployment@3
@@ -175,18 +174,6 @@ stages:
               csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/database.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/database.params.json"
               deploymentMode: "Incremental"
-              deploymentOutputs: database_arm
-          - task: PowerShell@2
-            name: "ParseDatabaseARMOutput"
-            inputs:
-              targetType: "inline"
-              script: |
-                $output = $Env:database_arm | ConvertFrom-Json
-                $vars = 'sqlServerName'
-                $vars | foreach {
-                  echo "##vso[task.setvariable variable=$_;isOutput=true]$($output.$_.value)"
-                }
-              pwsh: true
       - job: InfrastructureTesting
         dependsOn:
           - Network
