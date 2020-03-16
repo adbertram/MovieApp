@@ -64,7 +64,7 @@ stages:
               targetType: "inline"
               script: |
                 $output = $Env:network_arm | ConvertFrom-Json
-                $vars = 'subnetName','virtualNetworkName','loadBalancerName','loadBalancerBackendPoolName','publicDnsName','availablitySetName','availSetVmInstanceCount'
+                $vars = 'subnetName','virtualNetworkName','loadBalancerName','loadBalancerBackendPoolName','publicDnsName','availabilitySetName','availSetVmInstanceCount'
                 $vars | foreach {
                   echo "##vso[task.setvariable variable=$_;isOutput=true]$($output.$_.value)"
                 }
@@ -120,7 +120,7 @@ stages:
           virtualNetworkName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.virtualNetworkName'] ]
           loadBalancerName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.loadBalancerName'] ]
           loadBalancerBackendPoolName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.loadBalancerBackendPoolName'] ]
-          availablitySetName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.availablitySetName'] ]
+          availabilitySetName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.availabilitySetName'] ]
           availSetVmInstanceCount: $[ dependencies.Network.outputs['ParseNetworkARMOutput.availSetVmInstanceCount'] ]
         steps:
           - task: AzureResourceManagerTemplateDeployment@3
@@ -134,7 +134,7 @@ stages:
               templateLocation: "Linked artifact"
               csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/compute.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/compute.params.json"
-              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -availablitySetName $(availablitySetName) -availSetVmInstanceCount $(availSetVmInstanceCount)"
+              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -availabilitySetName $(availabilitySetName) -availSetVmInstanceCount $(availSetVmInstanceCount)"
               deploymentMode: "Incremental"
               deploymentOutputs: compute_arm
           - task: PowerShell@2
