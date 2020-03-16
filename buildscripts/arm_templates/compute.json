@@ -74,9 +74,24 @@
             "version": "latest"
         },
         "imageReference": "[variables('osType')]",
-        "nicNamePrefix": "[parameters('vmNamePrefix')]"
+        "nicNamePrefix": "[parameters('vmNamePrefix')]",
+        "availabilitySetName": "movieappavailset",
+        "availSetVmInstanceCount": "2"
     },
     "resources": [
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "name": "[variables('availabilitySetName')]",
+            "apiVersion": "2019-07-01",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "platformFaultDomainCount": "[variables('availSetVmInstanceCount')]",
+                "platformUpdateDomainCount": "[variables('availSetVmInstanceCount')]"
+            },
+            "sku": {
+                "name": "Aligned"
+            }
+        },
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2018-11-01",
@@ -117,7 +132,7 @@
                 "count": "[parameters('availSetVmInstanceCount')]"
             },
             "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', variables('nicNamePrefix'), copyindex())]"
+                ""
             ],
             "properties": {
                 "availabilitySet": {

@@ -22,21 +22,9 @@
         "lbFrontEndName": "[parameters('projectName')]",
         "loadBalancerBackendPoolName": "[parameters('projectName')]",
         "loadBalancerRuleName": "HTTPLBRule",
-        "lbProbeName": "[parameters('projectName')]",
-        "availabilitySetName": "movieappavailset",
-        "availSetVmInstanceCount": "2"
+        "lbProbeName": "[parameters('projectName')]"
     },
     "resources": [
-        {
-            "type": "Microsoft.Compute/availabilitySets",
-            "name": "[variables('availabilitySetName')]",
-            "apiVersion": "2019-07-01",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "platformFaultDomainCount": "[variables('availSetVmInstanceCount')]",
-                "platformUpdateDomainCount": "[variables('availSetVmInstanceCount')]"
-            }
-        },
         {
             "type": "Microsoft.Network/loadBalancers",
             "apiVersion": "2019-11-01",
@@ -188,14 +176,6 @@
         },
         "publicDnsName": {
             "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('pipName'))).dnsSettings.fqdn]",
-            "type": "string"
-        },
-        "availabilitySetName": {
-            "value": "[variables('availabilitySetName')]",
-            "type": "string"
-        },
-        "availSetVmInstanceCount": {
-            "value": "[variables('availSetVmInstanceCount')]",
             "type": "string"
         }
     }
