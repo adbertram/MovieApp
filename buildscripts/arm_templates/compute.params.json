@@ -41,6 +41,15 @@
                 },
                 "secretName": "StandardVmAdminPassword"
             }
+        },
+        "storageAccountName": {
+            "value": ""
+        },
+        "setupScriptContainerName": {
+            "value": ""
+        },
+        "sasToken": {
+            "value": ""
         }
     }
 }

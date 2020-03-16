@@ -120,7 +120,28 @@ stages:
           virtualNetworkName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.virtualNetworkName'] ]
           loadBalancerName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.loadBalancerName'] ]
           loadBalancerBackendPoolName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.loadBalancerBackendPoolName'] ]
+          storageAccountName: $[ dependencies.Storage.outputs['ParseStorageARMOutput.storageAccountName'] ]
+          setupScriptContainerName: $[ dependencies.Storage.outputs['ParseStorageARMOutput.setupScriptContainerName'] ]
+          sasToken: $[ dependencies.Storage.outputs['ParseStorageARMOutput.sasToken'] ]
+          storageAccountKey: $[ dependencies.Storage.outputs['ParseStorageARMOutput.storageAccountKey'] ]
         steps:
+          - task: AzurePowerShell@5
+            displayName: "Package up DSC script"
+            inputs:
+              azureSubscription: "ARM"
+              ScriptType: "InlineScript"
+              Inline: |
+                Install-Module xPSDesiredStateConfiguration -Force
+                Publish-AzVMDscConfiguration "$(System.DefaultWorkingDirectory)\buildscripts\iis_setup.ps1" -OutputArchivePath "$(System.DefaultWorkingDirectory)\buildscripts\iis_setup.zip"
+              FailOnStandardError: true
+              azurePowerShellVersion: "LatestVersion"
+          - task: AzureCLI@2
+            displayName: "Copy IIS DSC script to storage account"
+            inputs:
+              azureSubscription: "ARM"
+              scriptType: "pscore"
+              scriptLocation: "inlineScript"
+              inlineScript: 'az storage blob upload --container-name $(setupScriptContainerName) --file "$(System.DefaultWorkingDirectory)/buildscripts/iis_setup.zip" --name iis_setup.zip --account-name $(storageAccountName) --account-key $(storageAccountKey)'
           - task: AzureResourceManagerTemplateDeployment@3
             name: "Compute"
             inputs:
@@ -132,7 +153,7 @@ stages:
               templateLocation: "Linked artifact"
               csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/compute.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/compute.params.json"
-              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName)"
+              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -storageAccountName $(storageAccountName) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken)"
               deploymentMode: "Incremental"
               deploymentOutputs: compute_arm
           - task: PowerShell@2
@@ -178,50 +199,6 @@ stages:
                   echo "##vso[task.setvariable variable=$_;isOutput=true]$($output.$_.value)"
                 }
               pwsh: true
-      - job: IIS
-        pool:
-          vmImage: "windows-latest" ## This is for Publish-AzVMDscConfiguration
-        dependsOn:
-          - Storage
-          - Compute
-          - TemplateTests
-        variables:
-          storageAccountName: $[ dependencies.Storage.outputs['ParseStorageARMOutput.storageAccountName'] ]
-          setupScriptContainerName: $[ dependencies.Storage.outputs['ParseStorageARMOutput.setupScriptContainerName'] ]
-          sasToken: $[ dependencies.Storage.outputs['ParseStorageARMOutput.sasToken'] ]
-          storageAccountKey: $[ dependencies.Storage.outputs['ParseStorageARMOutput.storageAccountKey'] ]
-          vmNames: $[ dependencies.Compute.outputs['ParseComputeARMOutput.vmNames'] ]
-        steps:
-          - task: AzurePowerShell@5
-            displayName: "Package up DSC script"
-            inputs:
-              azureSubscription: "ARM"
-              ScriptType: "InlineScript"
-              Inline: |
-                Install-Module xPSDesiredStateConfiguration -Force
-                Publish-AzVMDscConfiguration "$(System.DefaultWorkingDirectory)\buildscripts\iis_setup.ps1" -OutputArchivePath "$(System.DefaultWorkingDirectory)\buildscripts\iis_setup.zip"
-              FailOnStandardError: true
-              azurePowerShellVersion: "LatestVersion"
-          - task: AzureCLI@2
-            displayName: "Copy IIS DSC script to storage account"
-            inputs:
-              azureSubscription: "ARM"
-              scriptType: "pscore"
-              scriptLocation: "inlineScript"
-              inlineScript: 'az storage blob upload --container-name $(setupScriptContainerName) --file "$(System.DefaultWorkingDirectory)/buildscripts/iis_setup.zip" --name iis_setup.zip --account-name $(storageAccountName) --account-key $(storageAccountKey)'
-          - task: AzureResourceManagerTemplateDeployment@3
-            name: "IIS"
-            inputs:
-              azureResourceManagerConnection: "ARM"
-              subscriptionId: "$(subscription_id)"
-              action: "Create Or Update Resource Group"
-              resourceGroupName: $(azure_resource_group_name)
-              location: "East US"
-              templateLocation: "Linked artifact"
-              csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/iis.json"
-              csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/iis.params.json"
-              overrideParameters: "-vmNames '$(vmNames)'.split(',') -storageAccountName $(storageAccountName) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken)"
-              deploymentMode: "Incremental"
       - job: InfrastructureTesting
         dependsOn:
           - Network
