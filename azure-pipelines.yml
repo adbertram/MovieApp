@@ -30,7 +30,7 @@ stages:
               azureSubscription: "ARM"
               ScriptType: "FilePath"
               ScriptPath: "$(System.DefaultWorkingDirectory)/buildscripts/tests/invoke-template-test.ps1"
-              ScriptArguments: '-ResourceType "compute","database","iis","network","storage" -ResourceGroupName "$(azure_resource_group_name)"'
+              ScriptArguments: '-ResourceType "compute","database","network","storage" -ResourceGroupName "$(azure_resource_group_name)"'
               FailOnStandardError: true
               azurePowerShellVersion: "LatestVersion"
           - task: PublishTestResults@2
