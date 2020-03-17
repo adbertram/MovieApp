@@ -229,7 +229,7 @@ stages:
           - publish: $(Build.StagingDirectory)
             artifact: app
       - job: Release
-        dependsOn: AppBuild
+        dependsOn: Build
         steps:
           # Don't clone the repo
           - checkout: none
