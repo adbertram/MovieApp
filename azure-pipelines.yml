@@ -21,26 +21,26 @@ variables:
 stages:
   - stage: "Infrastructure"
     jobs:
-      - job: TemplateTests
-        pool:
-          vmImage: "windows-latest"
-        steps:
-          - task: AzurePowerShell@5
-            inputs:
-              azureSubscription: "ARM"
-              ScriptType: "FilePath"
-              ScriptPath: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/invoke-template-test.ps1"
-              ScriptArguments: '-ResourceType "compute","database","network","storage" -ResourceGroupName "$(azure_resource_group_name)"'
-              FailOnStandardError: true
-              azurePowerShellVersion: "LatestVersion"
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: "NUnit"
-              testResultsFiles: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/templates.tests.xml"
-              failTaskOnFailedTests: true
+      # - job: TemplateTests
+      #   pool:
+      #     vmImage: "windows-latest"
+      #   steps:
+      #     - task: AzurePowerShell@5
+      #       inputs:
+      #         azureSubscription: "ARM"
+      #         ScriptType: "FilePath"
+      #         ScriptPath: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/invoke-template-test.ps1"
+      #         ScriptArguments: '-ResourceType "compute","database","network","storage" -ResourceGroupName "$(azure_resource_group_name)"'
+      #         FailOnStandardError: true
+      #         azurePowerShellVersion: "LatestVersion"
+      #     - task: PublishTestResults@2
+      #       inputs:
+      #         testResultsFormat: "NUnit"
+      #         testResultsFiles: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/templates.tests.xml"
+      #         failTaskOnFailedTests: true
       - job: Network
         dependsOn:
-          - TemplateTests
+          # - TemplateTests
         pool:
           vmImage: "windows-latest"
         steps:
@@ -71,7 +71,7 @@ stages:
               pwsh: true
       - job: Storage
         dependsOn:
-          - TemplateTests
+          # - TemplateTests
         pool:
           vmImage: "windows-latest"
         steps:
@@ -114,7 +114,7 @@ stages:
           vmImage: "windows-latest" ## Only needed because of Publish-AzVMDscConfiguration
         dependsOn:
           - Network
-          - TemplateTests
+          # - TemplateTests
           - Storage
         variables:
           subnetName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.subnetName'] ]
@@ -160,9 +160,9 @@ stages:
         pool:
           vmImage: "windows-latest"
         dependsOn:
-          - TemplateTests
+          # - TemplateTests
         steps:
-          - task: AzureResourceManagerTemplateDeployment@3
+          - task: AzureResourceManagerTemplateDeployment@3 ## Create the Azure SQL DB
             name: "DatabaseARMDeployment"
             inputs:
               azureResourceManagerConnection: "ARM"
@@ -175,42 +175,42 @@ stages:
               csmParametersFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/database.params.json"
               deploymentMode: "Incremental"
               deploymentOutputs: database_arm
-          - task: SqlAzureDacpacDeployment@1
+          - task: SqlAzureDacpacDeployment@1 ## Build database schema
             inputs:
               azureSubscription: 'ARM'
               AuthenticationType: 'server'
-              ServerName: "$(database_arm.sqlServerName.value)"
+              ServerName: "$(database_arm.sqlServerName)"
               SqlUsername: "$(SqlAdminUsername)" ## From keyvault
               SqlPassword: "$(SqlAdminPassword)" ## From keyvault
               deployType: 'SqlTask'
-              SqlFile: '$(System.DefaultWorkingDirectory)/Movie.sql'
+              SqlFile: '$(System.DefaultWorkingDirectory)/infra_build_scripts/MovieSchema.sql'
               SqlAdditionalArguments: 'MoviesDB'
               IpDetectionMethod: 'AutoDetect'
-      - job: InfrastructureTesting
-        dependsOn:
-          - Network
-          - Storage
-          - Compute
-          - Database
-          - TemplateTests
-        pool:
-          vmImage: "windows-latest"
-        variables:
-          publicDnsName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.publicDnsName'] ]
-        steps:
-          - task: AzurePowerShell@5
-            inputs:
-              azureSubscription: "ARM"
-              ScriptType: "FilePath"
-              ScriptPath: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/invoke-infrastructure-test.ps1"
-              ScriptArguments: '-Parameter @{publicDnsName="$(publicDnsName)"}'
-              FailOnStandardError: true
-              azurePowerShellVersion: "LatestVersion"
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: "NUnit"
-              testResultsFiles: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/infrastructure.tests.xml"
-              failTaskOnFailedTests: true
+      # - job: InfrastructureTesting
+      #   dependsOn:
+      #     - Network
+      #     - Storage
+      #     - Compute
+      #     - Database
+      #     - TemplateTests
+      #   pool:
+      #     vmImage: "windows-latest"
+      #   variables:
+      #     publicDnsName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.publicDnsName'] ]
+      #   steps:
+      #     - task: AzurePowerShell@5
+      #       inputs:
+      #         azureSubscription: "ARM"
+      #         ScriptType: "FilePath"
+      #         ScriptPath: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/invoke-infrastructure-test.ps1"
+      #         ScriptArguments: '-Parameter @{publicDnsName="$(publicDnsName)"}'
+      #         FailOnStandardError: true
+      #         azurePowerShellVersion: "LatestVersion"
+      #     - task: PublishTestResults@2
+      #       inputs:
+      #         testResultsFormat: "NUnit"
+      #         testResultsFiles: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/infrastructure.tests.xml"
+      #         failTaskOnFailedTests: true
   - stage: Application
     dependsOn: Infrastructure
     jobs:
