@@ -15,12 +15,12 @@ try {
 
     $armOutputObj.PSObject.Properties | ForEach-Object {
         $type = ($_.value.type).ToLower()
-        $keyname = "Output_"+$_.name
+        $keyname = $_.name
         $value = $_.value.value
 
         $varPrefix = "##vso[task.setvariable variable=$keyname"
-
         $vsoAttribs = @("task.setvariable variable = $_")
+        
         if ($type -eq "securestring") {
             $vsoAttribs += 'isSecret = true'
         } elseif ($type -ne "string") {
