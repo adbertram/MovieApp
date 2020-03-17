@@ -73,7 +73,7 @@
     ],
     "outputs": {
         "sqlServerName": {
-            "value": "[reference(resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))).dnsSettings.fqdn]",
+            "value": "[reference(resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))).fullyQualifiedDomainName]",
             "type": "string"
         }
     }
