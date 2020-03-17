@@ -58,7 +58,7 @@ stages:
               overrideParameters: "-projectName $(project_name)"
               deploymentMode: "Incremental"
               deploymentOutputs: network_arm
-          - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString "$(network_arm)" -MakeOutput -ErrorAction Stop
+          - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(network_arm)' -MakeOutput -ErrorAction Stop
             displayName: "Create output variables"
       - job: Storage
         dependsOn:
