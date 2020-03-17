@@ -210,7 +210,7 @@ stages:
             inputs:
               command: 'custom'
               projects: '*.csproj'
-              custom: 'ef database update'
+              arguments: 'ef database update'
           # Build and publish the application library
           - task: DotNetCoreCLI@2
             displayName: "dotnet build"
