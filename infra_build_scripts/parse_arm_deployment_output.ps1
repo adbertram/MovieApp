@@ -13,6 +13,8 @@ try {
     Write-Output "Retrieved input: $ArmOutputString"
     $armOutputObj = $ArmOutputString | convertfrom-json
 
+    $armOutputObj | gm | Out-String
+
     $armOutputObj.PSObject.Properties | ForEach-Object {
         $type = ($_.value.type).ToLower()
         $keyname = $_.Name
