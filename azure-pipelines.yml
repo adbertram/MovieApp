@@ -58,12 +58,8 @@ stages:
               overrideParameters: "-projectName $(project_name)"
               deploymentMode: "Incremental"
               deploymentOutputs: network_arm
-          - task: PowerShell@2
+          - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString "$(network_arm)" -MakeOutput -ErrorAction Stop
             displayName: "Create output variables"
-            inputs:
-              filePath: '$(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1'
-              arguments: '-ArmOutputString "$(network_arm)" -MakeOutput -ErrorAction Stop'
-              pwsh: true
       - job: Storage
         dependsOn:
           # - TemplateTests
@@ -91,12 +87,8 @@ stages:
               overrideParameters: "-storageAccountName $(storage_account_name) -signedExpirySasToken $(signedExpirySasToken)"
               deploymentMode: "Incremental"
               deploymentOutputs: storage_arm
-          - task: PowerShell@2
+          - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString "$(storage_arm)" -MakeOutput -ErrorAction Stop
             displayName: "Create output variables"
-            inputs:
-              filePath: '$(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1'
-              arguments: '-ArmOutputString "$(storage_arm)" -MakeOutput -ErrorAction Stop'
-              pwsh: true
       - job: Compute
         pool:
           vmImage: "windows-latest" ## Only needed because of Publish-AzVMDscConfiguration
