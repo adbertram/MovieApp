@@ -18,7 +18,7 @@ try {
         $keyname = "Output_"+$_.name
         $value = $_.value.value
 
-        $vsoAttribs = @("task.setvariable variable = $value")
+        $vsoAttribs = @("task.setvariable variable = $keyName")
         
         if ($type -eq "securestring") {
             $vsoAttribs += 'isSecret=true'
@@ -31,7 +31,7 @@ try {
         }
 
         $attribString = $vsoAttribs -join ';'
-        $var = "##vso[$attribString]$($value)"
+        $var = "##vso[$attribString]$value"
         Write-Output -InputObject $var
     }
 } catch {
