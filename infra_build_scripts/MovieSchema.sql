@@ -3,10 +3,10 @@ DROP TABLE IF EXISTS "Movie";
 CREATE TABLE "Movie"
 (
     "Id" INT NOT NULL IDENTITY PRIMARY KEY,
-    "Title" VARCHAR,
-    "ReleaseDate" VARCHAR NOT NULL,
-    "Genre" VARCHAR,
-    "Price" VARCHAR NOT NULL
+    "Title" VARCHAR(max),
+    "ReleaseDate" VARCHAR(max) NOT NULL,
+    "Genre" VARCHAR(max),
+    "Price" VARCHAR(max) NOT NULL
 );
 INSERT INTO "Movie"
     ("Title","ReleaseDate","Genre","Price")
