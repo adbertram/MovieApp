@@ -199,24 +199,25 @@ stages:
               testResultsFormat: "NUnit"
               testResultsFiles: "$(System.DefaultWorkingDirectory)/buildscripts/tests/infrastructure.tests.xml"
               failTaskOnFailedTests: true
-  - stage: AppDeployment
+  - stage: Application
     dependsOn: Infrastructure
     jobs:
       - job: AppBuild
         pool:
           vmImage: "ubuntu-latest"
         steps:
-          # Build and publish the application library
           - task: DotNetCoreCLI@2
-            displayName: "dotnet restore"
             inputs:
-              command: restore
-              projects: "**/*.csproj"
+              command: 'custom'
+              projects: '*.csproj'
+              custom: 'ef'
+              arguments: 'database update'
+          # Build and publish the application library
           - task: DotNetCoreCLI@2
             displayName: "dotnet build"
             inputs:
               command: build
-              projects: "**/*.csproj"
+              projects: "*.csproj"
               arguments: "--configuration $(buildConfiguration)"
           - task: DotNetCoreCLI@2
             displayName: "dotnet publish"
@@ -237,6 +238,7 @@ stages:
           # Download the published application artifact
           - download: current
             artifact: app
+  
         # Release the app
         # - task: AzureRmWebAppDeployment@4
         #   inputs:
