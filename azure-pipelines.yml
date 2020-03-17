@@ -158,6 +158,7 @@ stages:
           - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(database_arm)' -ErrorAction Stop
             displayName: "Create output variables"
           - task: AzureKeyVault@1
+            displayName: "Download SQL key vault variables"
             inputs:
               azureSubscription: 'ARM'
               KeyVaultName: 'MovieApp-KV'
@@ -166,6 +167,7 @@ stages:
             inputs:
               azureSubscription: 'ARM'
               AuthenticationType: 'server'
+              DatabaseName: "$(databaseName)" ## From database ARM deployment
               ServerName: "$(sqlServerName)" ## From database ARM deployment
               SqlUsername: "$(SqlAdminUsername)" ## From keyvault
               SqlPassword: "$(SqlAdminPassword)" ## From keyvault
