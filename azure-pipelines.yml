@@ -163,6 +163,17 @@ stages:
               azureSubscription: 'ARM'
               KeyVaultName: 'MovieApp-KV'
               SecretsFilter: 'SqlAdminUsername,SqlAdminPassword'
+          - task: SqlAzureDacpacDeployment@1 ## Build database schema
+            inputs:
+              azureSubscription: 'ARM'
+              AuthenticationType: 'server'
+              DatabaseName: "$(databaseName)" ## From database ARM deployment
+              ServerName: "$(sqlServerName)" ## From database ARM deployment
+              SqlUsername: "$(SqlAdminUsername)" ## From keyvault
+              SqlPassword: "$(SqlAdminPassword)" ## From keyvault
+              deployType: 'SqlTask'
+              SqlFile: '$(System.DefaultWorkingDirectory)/infra_build_scripts/MovieSchema.sql'
+              IpDetectionMethod: 'AutoDetect'
       # - job: InfrastructureTesting
       #   dependsOn:
       #     - Network
