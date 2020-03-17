@@ -1,3 +1,4 @@
+[![Build Status](https://dev.azure.com/adbertram/MovieApp/_apis/build/status/MovieApp?branchName=master)](https://dev.azure.com/adbertram/MovieApp/_build/latest?definitionId=21&branchName=master)
 # MovieApp
 
 A simple demo .NET Core application to demonstrate CI/CD in Azure Pipelines.
