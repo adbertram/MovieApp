@@ -9,7 +9,7 @@ CREATE TABLE "Movie"
     "Price" VARCHAR NOT NULL
 );
 INSERT INTO "Movie"
-    ("Id","Title","ReleaseDate","Genre","Price")
+    ("Title","ReleaseDate","Genre","Price")
 VALUES
-    (1, 'Software', '2019-06-03 00:00:00', 'Drama', '20.0');
+    ('Software', '2019-06-03 00:00:00', 'Drama', '20.0');
 COMMIT;
