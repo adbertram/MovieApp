@@ -1,11 +1,14 @@
 BEGIN TRANSACTION;
 DROP TABLE IF EXISTS "Movie";
-CREATE TABLE IF NOT EXISTS "Movie" (
-	"Id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	"Title"	TEXT,
-	"ReleaseDate"	TEXT NOT NULL,
-	"Genre"	TEXT,
-	"Price"	TEXT NOT NULL
+CREATE TABLE "Movie" (
+	"Id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	"Title"	        VARCHAR,
+	"ReleaseDate"	VARCHAR NOT NULL,
+	"Genre"	        VARCHAR,
+	"Price"	        VARCHAR NOT NULL
 );
-INSERT INTO "Movie" ("Id","Title","ReleaseDate","Genre","Price") VALUES (1,'Software','2019-06-03 00:00:00','Drama','20.0');
+INSERT INTO "Movie"
+    ("Id","Title","ReleaseDate","Genre","Price")
+VALUES
+    (1, 'Software', '2019-06-03 00:00:00', 'Drama', '20.0');
 COMMIT;
