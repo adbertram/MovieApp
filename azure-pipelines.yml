@@ -20,6 +20,8 @@ variables:
 
 stages:
   - stage: "Infrastructure"
+    pool:
+      vmImage: "ubuntu-latest"
     jobs:
       # - job: TemplateTests
       #   pool:
@@ -41,8 +43,6 @@ stages:
       - job: Network
         dependsOn:
           # - TemplateTests
-        pool:
-          vmImage: "windows-latest"
         steps:
           - task: AzureResourceManagerTemplateDeployment@3
             name: "NetworkARMDeployment"
@@ -61,13 +61,11 @@ stages:
           - task: PowerShell@2
             inputs:
               filePath: '$(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1'
-              arguments: '-ArmOutputString $($network_arm) -MakeOutput'
+              arguments: '-ArmOutputString $($network_arm) -MakeOutput -ErrorAction Stop'
               pwsh: true
       - job: Storage
         dependsOn:
           # - TemplateTests
-        pool:
-          vmImage: "windows-latest"
         steps:
           - task: PowerShell@2
             displayName: "Generate datetime stamp for storage account"
@@ -95,7 +93,7 @@ stages:
           - task: PowerShell@2
             inputs:
               filePath: '$(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1'
-              arguments: '-ArmOutputString $($storage_arm) -MakeOutput'
+              arguments: '-ArmOutputString $($storage_arm) -MakeOutput -ErrorAction Stop'
               pwsh: true
       - job: Compute
         pool:
@@ -181,8 +179,6 @@ stages:
       #     - Compute
       #     - Database
       #     - TemplateTests
-      #   pool:
-      #     vmImage: "windows-latest"
       #   variables:
       #     publicDnsName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.publicDnsName'] ]
       #   steps:
@@ -201,6 +197,8 @@ stages:
       #         failTaskOnFailedTests: true
   - stage: Application
     dependsOn: Infrastructure
+    pool:
+      vmImage: "ubuntu-latest"
     jobs:
       - job: Build
         pool:
