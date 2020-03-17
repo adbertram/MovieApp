@@ -1,11 +1,12 @@
 BEGIN TRANSACTION;
 DROP TABLE IF EXISTS "Movie";
-CREATE TABLE "Movie" (
-	"Id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	"Title"	        VARCHAR,
-	"ReleaseDate"	VARCHAR NOT NULL,
-	"Genre"	        VARCHAR,
-	"Price"	        VARCHAR NOT NULL
+CREATE TABLE "Movie"
+(
+    "Id" INT NOT NULL IDENTITY PRIMARY KEY,
+    "Title" VARCHAR,
+    "ReleaseDate" VARCHAR NOT NULL,
+    "Genre" VARCHAR,
+    "Price" VARCHAR NOT NULL
 );
 INSERT INTO "Movie"
     ("Id","Title","ReleaseDate","Genre","Price")
