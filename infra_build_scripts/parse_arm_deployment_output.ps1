@@ -13,12 +13,10 @@ try {
     Write-Output "Retrieved input: $ArmOutputString"
     $armOutputObj = $ArmOutputString | convertfrom-json
 
-    $armOutputObj.subnetName
-
     $armOutputObj.PSObject.Properties | ForEach-Object {
         $type = ($_.value.type).ToLower()
         $keyname = $_.Name
-        $value = $armOutputObj.Value
+        $value = $_.Value
 
         $vsoAttribs = @("task.setvariable variable = $keyName")
         
