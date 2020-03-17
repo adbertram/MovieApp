@@ -59,15 +59,9 @@ stages:
               deploymentMode: "Incremental"
               deploymentOutputs: network_arm
           - task: PowerShell@2
-            name: "ParseNetworkARMOutput"
             inputs:
-              targetType: "inline"
-              script: |
-                $output = $Env:network_arm | ConvertFrom-Json
-                $vars = 'subnetName','virtualNetworkName','loadBalancerName','loadBalancerBackendPoolName','publicDnsName'
-                $vars | foreach {
-                  echo "##vso[task.setvariable variable=$_;isOutput=true]$($output.$_.value)"
-                }
+              filePath: '$(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1'
+              arguments: '-ArmOutputString $($network_arm) -MakeOutput'
               pwsh: true
       - job: Storage
         dependsOn:
@@ -99,15 +93,9 @@ stages:
               deploymentMode: "Incremental"
               deploymentOutputs: storage_arm
           - task: PowerShell@2
-            name: "ParseStorageARMOutput"
             inputs:
-              targetType: "inline"
-              script: |
-                $output = $Env:storage_arm | ConvertFrom-Json
-                $vars = 'storageAccountName','setupScriptContainerName','sasToken','storageAccountKey'
-                $vars | foreach {
-                  echo "##vso[task.setvariable variable=$_;isOutput=true]$($output.$_.value)"
-                }
+              filePath: '$(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1'
+              arguments: '-ArmOutputString $($storage_arm) -MakeOutput'
               pwsh: true
       - job: Compute
         pool:
