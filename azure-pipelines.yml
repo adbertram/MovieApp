@@ -4,7 +4,7 @@ trigger:
       - master
   paths:
     exclude:
-      - buildscripts/*
+      - infra_build_scripts/*
 
 variables:
   - name: project_name
@@ -29,14 +29,14 @@ stages:
             inputs:
               azureSubscription: "ARM"
               ScriptType: "FilePath"
-              ScriptPath: "$(System.DefaultWorkingDirectory)/buildscripts/tests/invoke-template-test.ps1"
+              ScriptPath: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/invoke-template-test.ps1"
               ScriptArguments: '-ResourceType "compute","database","network","storage" -ResourceGroupName "$(azure_resource_group_name)"'
               FailOnStandardError: true
               azurePowerShellVersion: "LatestVersion"
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: "NUnit"
-              testResultsFiles: "$(System.DefaultWorkingDirectory)/buildscripts/tests/templates.tests.xml"
+              testResultsFiles: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/templates.tests.xml"
               failTaskOnFailedTests: true
       - job: Network
         dependsOn:
@@ -53,8 +53,8 @@ stages:
               resourceGroupName: $(azure_resource_group_name)
               location: "East US"
               templateLocation: "Linked artifact"
-              csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/network.json"
-              csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/network.params.json"
+              csmFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/network.json"
+              csmParametersFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/network.params.json"
               overrideParameters: "-projectName $(project_name)"
               deploymentMode: "Incremental"
               deploymentOutputs: network_arm
@@ -93,8 +93,8 @@ stages:
               resourceGroupName: $(azure_resource_group_name)
               location: "East US"
               templateLocation: "Linked artifact"
-              csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/storage.json"
-              csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/storage.params.json"
+              csmFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/storage.json"
+              csmParametersFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/storage.params.json"
               overrideParameters: "-storageAccountName $(storage_account_name) -signedExpirySasToken $(signedExpirySasToken)"
               deploymentMode: "Incremental"
               deploymentOutputs: storage_arm
@@ -133,7 +133,7 @@ stages:
               ScriptType: "InlineScript"
               Inline: |
                 Install-Module xPSDesiredStateConfiguration -Force
-                Publish-AzVMDscConfiguration "$(System.DefaultWorkingDirectory)\buildscripts\iis_setup.ps1" -OutputArchivePath "$(System.DefaultWorkingDirectory)\buildscripts\iis_setup.zip"
+                Publish-AzVMDscConfiguration "$(System.DefaultWorkingDirectory)\infra_build_scripts\iis_setup.ps1" -OutputArchivePath "$(System.DefaultWorkingDirectory)\infra_build_scripts\iis_setup.zip"
               FailOnStandardError: true
               azurePowerShellVersion: "LatestVersion"
           - task: AzureCLI@2
@@ -142,7 +142,7 @@ stages:
               azureSubscription: "ARM"
               scriptType: "batch"
               scriptLocation: "inlineScript"
-              inlineScript: 'az storage blob upload --container-name $(setupScriptContainerName) --file "$(System.DefaultWorkingDirectory)/buildscripts/iis_setup.zip" --name iis_setup.zip --account-name "$(storageAccountName)" --account-key "$(storageAccountKey)"'
+              inlineScript: 'az storage blob upload --container-name $(setupScriptContainerName) --file "$(System.DefaultWorkingDirectory)/infra_build_scripts/iis_setup.zip" --name iis_setup.zip --account-name "$(storageAccountName)" --account-key "$(storageAccountKey)"'
           - task: AzureResourceManagerTemplateDeployment@3
             name: "Compute"
             inputs:
@@ -152,8 +152,8 @@ stages:
               resourceGroupName: $(azure_resource_group_name)
               location: "East US"
               templateLocation: "Linked artifact"
-              csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/compute.json"
-              csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/compute.params.json"
+              csmFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/compute.json"
+              csmParametersFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/compute.params.json"
               overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -storageAccountName $(storageAccountName) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken)"
               deploymentMode: "Incremental"
       - job: Database
@@ -171,8 +171,8 @@ stages:
               resourceGroupName: $(azure_resource_group_name)
               location: "East US"
               templateLocation: "Linked artifact"
-              csmFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/database.json"
-              csmParametersFile: "$(System.DefaultWorkingDirectory)/buildscripts/arm_templates/database.params.json"
+              csmFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/database.json"
+              csmParametersFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/database.params.json"
               deploymentMode: "Incremental"
       - job: InfrastructureTesting
         dependsOn:
@@ -190,19 +190,19 @@ stages:
             inputs:
               azureSubscription: "ARM"
               ScriptType: "FilePath"
-              ScriptPath: "$(System.DefaultWorkingDirectory)/buildscripts/tests/invoke-infrastructure-test.ps1"
+              ScriptPath: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/invoke-infrastructure-test.ps1"
               ScriptArguments: '-Parameter @{publicDnsName="$(publicDnsName)"}'
               FailOnStandardError: true
               azurePowerShellVersion: "LatestVersion"
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: "NUnit"
-              testResultsFiles: "$(System.DefaultWorkingDirectory)/buildscripts/tests/infrastructure.tests.xml"
+              testResultsFiles: "$(System.DefaultWorkingDirectory)/infra_build_scripts/tests/infrastructure.tests.xml"
               failTaskOnFailedTests: true
   - stage: Application
     dependsOn: Infrastructure
     jobs:
-      - job: AppBuild
+      - job: Build
         pool:
           vmImage: "ubuntu-latest"
         steps:

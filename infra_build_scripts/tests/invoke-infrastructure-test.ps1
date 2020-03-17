@@ -11,14 +11,14 @@ param(
 Install-Module Pester -Force
 
 $script = @{
-    Path        = "$env:System_DefaultWorkingDirectory\buildscripts\tests\infrastructure.tests.ps1"
+    Path        = "$env:System_DefaultWorkingDirectory\infra_build_scripts\tests\infrastructure.tests.ps1"
     Parameters  = $Parameter
 }
 
 $params = @{
     Script       = $script
     OutputFormat = 'NUnitXml'
-    OutputFile   = "$env:System_DefaultWorkingDirectory\buildscripts\tests\infrastructure.tests.xml"
+    OutputFile   = "$env:System_DefaultWorkingDirectory\infra_build_scripts\tests\infrastructure.tests.xml"
     EnableExit   = $true
 }
 Invoke-Pester @params
