@@ -18,7 +18,7 @@ try {
         $keyname = $_.Name
         $value = $_.Value.value
 
-        $vsoAttribs = @("task.setvariable variable = $keyName")
+        $vsoAttribs = @("task.setvariable variable=$keyName")
         
         if ($type -eq "securestring") {
             $vsoAttribs += 'isSecret=true'
