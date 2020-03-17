@@ -59,6 +59,7 @@ stages:
               deploymentMode: "Incremental"
               deploymentOutputs: network_arm
           - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(network_arm)' -MakeOutput -ErrorAction Stop
+            name: CreateOutputVariables
             displayName: "Create output variables"
       - job: Storage
         dependsOn:
@@ -88,7 +89,7 @@ stages:
               deploymentMode: "Incremental"
               deploymentOutputs: storage_arm
           - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(storage_arm)' -MakeOutput -ErrorAction Stop
-            displayName: "Create output variables"
+            name: CreateOutputVariables
       - job: Compute
         pool:
           vmImage: "windows-latest" ## Only needed because of Publish-AzVMDscConfiguration
@@ -97,14 +98,14 @@ stages:
           # - TemplateTests
           - Storage
         variables:
-          subnetName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.subnetName'] ]
-          virtualNetworkName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.virtualNetworkName'] ]
-          loadBalancerName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.loadBalancerName'] ]
-          loadBalancerBackendPoolName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.loadBalancerBackendPoolName'] ]
-          storageAccountName: $[ dependencies.Storage.outputs['ParseStorageARMOutput.storageAccountName'] ]
-          setupScriptContainerName: $[ dependencies.Storage.outputs['ParseStorageARMOutput.setupScriptContainerName'] ]
-          sasToken: $[ dependencies.Storage.outputs['ParseStorageARMOutput.sasToken'] ]
-          storageAccountKey: $[ dependencies.Storage.outputs['ParseStorageARMOutput.storageAccountKey'] ]
+          subnetName: $[ dependencies.Network.outputs['CreateOutputVariables.subnetName'] ]
+          virtualNetworkName: $[ dependencies.Network.outputs['CreateOutputVariables.virtualNetworkName'] ]
+          loadBalancerName: $[ dependencies.Network.outputs['CreateOutputVariables.loadBalancerName'] ]
+          loadBalancerBackendPoolName: $[ dependencies.Network.outputs['CreateOutputVariables.loadBalancerBackendPoolName'] ]
+          storageAccountName: $[ dependencies.Storage.outputs['CreateOutputVariables.storageAccountName'] ]
+          setupScriptContainerName: $[ dependencies.Storage.outputs['CreateOutputVariables.setupScriptContainerName'] ]
+          sasToken: $[ dependencies.Storage.outputs['CreateOutputVariables.sasToken'] ]
+          storageAccountKey: $[ dependencies.Storage.outputs['CreateOutputVariables.storageAccountKey'] ]
         steps:
           - task: AzurePowerShell@5
             displayName: "Package up DSC script"
@@ -156,7 +157,7 @@ stages:
               deploymentMode: "Incremental"
               deploymentOutputs: database_arm
           - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(database_arm)' -ErrorAction Stop
-            displayName: "Create output variables"
+            name: CreateOutputVariables
           - task: AzureKeyVault@1
             displayName: "Download SQL key vault variables"
             inputs:
@@ -182,7 +183,7 @@ stages:
       #     - Database
       #     - TemplateTests
       #   variables:
-      #     publicDnsName: $[ dependencies.Network.outputs['ParseNetworkARMOutput.publicDnsName'] ]
+      #     publicDnsName: $[ dependencies.Network.outputs['CreaterOutputVariables.publicDnsName'] ]
       #   steps:
       #     - task: AzurePowerShell@5
       #       inputs:
