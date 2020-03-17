@@ -11,8 +11,6 @@ variables:
     value: "movieapp"
   - name: azure_resource_group_name
     value: "movieapp"
-  - name: storage_account_name
-    value: "movieappstorage"
   - name: subscription_id
     value: "1427e7fb-a488-4ec5-be44-30ac10ca2e95"
   - name: buildConfiguration
@@ -85,7 +83,7 @@ stages:
               templateLocation: "Linked artifact"
               csmFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/storage.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/storage.params.json"
-              overrideParameters: "-storageAccountName $(storage_account_name) -signedExpirySasToken $(signedExpirySasToken)"
+              overrideParameters: "-signedExpirySasToken $(signedExpirySasToken)"
               deploymentMode: "Incremental"
               deploymentOutputs: storage_arm
           - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(storage_arm)' -MakeOutput -ErrorAction Stop
@@ -204,14 +202,7 @@ stages:
       vmImage: "ubuntu-latest"
     jobs:
       - job: Build
-        pool:
-          vmImage: "ubuntu-latest"
         steps:
-          - task: DotNetCoreCLI@2
-            inputs:
-              command: 'custom'
-              projects: '*.csproj'
-              arguments: 'ef database update'
           # Build and publish the application library
           - task: DotNetCoreCLI@2
             displayName: "dotnet build"
