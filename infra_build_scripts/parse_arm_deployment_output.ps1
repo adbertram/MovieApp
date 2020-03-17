@@ -15,8 +15,8 @@ try {
 
     $armOutputObj.PSObject.Properties | ForEach-Object {
         $type = ($_.value.type).ToLower()
-        $keyname = "Output_"+$_.name
-        $value = $_.value.value
+        $keyname = $_.Name
+        $value = $armOutputObj.Value
 
         $vsoAttribs = @("task.setvariable variable = $keyName")
         
