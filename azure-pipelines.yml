@@ -155,11 +155,13 @@ stages:
               csmParametersFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/database.params.json"
               deploymentMode: "Incremental"
               deploymentOutputs: database_arm
+          - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(database_arm)' -ErrorAction Stop
+            displayName: "Create output variables"
           - task: SqlAzureDacpacDeployment@1 ## Build database schema
             inputs:
               azureSubscription: 'ARM'
               AuthenticationType: 'server'
-              ServerName: "$(database_arm.sqlServerName)"
+              ServerName: "$(sqlServerName)" ## From database ARM deployment
               SqlUsername: "$(SqlAdminUsername)" ## From keyvault
               SqlPassword: "$(SqlAdminPassword)" ## From keyvault
               deployType: 'SqlTask'
