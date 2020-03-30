@@ -250,7 +250,7 @@ stages:
               SecretsFilter: 'StandardVmAdminUsername,StandardVmAdminPassword'
           - task: AzureFileCopy@4
             inputs:
-              sourcePath: "$(Build.ArtifactStagingDirectory)/app.zip"
+              sourcePath: $(Build.ArtifactStagingDirectory)
               azureSubscription: ARM
               destination: AzureVMs
               storage: $(storage_account_name)
