@@ -240,8 +240,11 @@ stages:
           vmImage: "windows-latest" ## Only to use the AzureFileCopy task
         steps:
           - checkout: none
-          - download: current
-            artifact: app
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              source: 'current'
+              path: '$(Build.ArtifactStagingDirectory)' 
+              artifact: app
           - task: AzureKeyVault@1
             displayName: "Download the VM admin username and password vars"
             inputs:
@@ -250,7 +253,7 @@ stages:
               SecretsFilter: 'StandardVmAdminUsername,StandardVmAdminPassword'
           - task: AzureFileCopy@4
             inputs:
-              sourcePath: $(Build.ArtifactStagingDirectory)
+              sourcePath: '$(Build.ArtifactStagingDirectory)\app.zip'
               azureSubscription: ARM
               destination: AzureVMs
               storage: $(storage_account_name)
