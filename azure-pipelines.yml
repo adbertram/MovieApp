@@ -236,6 +236,8 @@ stages:
             artifact: app
       - job: Release
         dependsOn: Build
+        pool:
+          vmImage: "windows-latest" ## Only to use the AzureFileCopy task
         steps:
           - checkout: none
           - download: current

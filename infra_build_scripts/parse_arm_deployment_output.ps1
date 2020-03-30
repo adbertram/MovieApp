@@ -18,7 +18,7 @@ $armOutputObj.PSObject.Properties | ForEach-Object {
     $vsoAttribs = @("task.setvariable variable=$keyName")
 
     if ($type -eq "array") {
-        $value = $_.Value.value.name -join ','
+        $value = $_.Value.value.name -join ',' ## All array variables will come out as comma-separated strings
     } elseif ($type -eq "securestring") {
         $vsoAttribs += 'isSecret=true'
     } elseif ($type -ne "string") {
