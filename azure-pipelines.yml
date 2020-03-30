@@ -254,7 +254,7 @@ stages:
               source: 'current'
               path: $(Build.ArtifactStagingDirectory)
               artifact: variables
-          - pwsh: |
+          - pwsh: | ## Create the vars to provide to the Azure file copy task
               vmNames=$(Get-Content -Path $(Build.ArtifactStagingDirectory)/variables/vmNames)
               "##vso[task.setvariable variable=vmNames]$vmNames"
           - task: AzureKeyVault@1
@@ -265,12 +265,12 @@ stages:
               SecretsFilter: 'StandardVmAdminUsername,StandardVmAdminPassword'
           - task: AzureFileCopy@4
             inputs:
-              sourcePath: '$(Build.ArtifactStagingDirectory)\app.zip'
+              sourcePath: $(Build.ArtifactStagingDirectory)\app.zip
               azureSubscription: ARM
               destination: AzureVMs
-              storage: $(storage_account_name)
+              storage: $(storage_account_name) ## temp location as an intermediary to transfer files to VMs
               resourceGroup: $(azure_resource_group_name)
-              MachineNames: $(vmNames)
+              MachineNames: $(vmNames) ## vmNames from Compute job in Infrastructure stage
               vmsAdminUserName: $(StandardVmAdminUsername) ## From keyvault
               vmsAdminPassword: $(StandardVmAdminPassword) ## From keyvault
               targetPath: 'C:\inetpub\wwwroot'
