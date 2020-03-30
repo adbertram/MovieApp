@@ -141,6 +141,11 @@ stages:
               deploymentOutputs: compute_arm
           - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(compute_arm)' -ErrorAction Stop
             name: CreateOutputVariables
+          - pwsh: |
+              mkdir "$(Pipeline.Workspace)/variables"
+              echo $env:vmNames > $(Pipeline.Workspace)/variables/vmNames
+          - publish: $(Pipeline.Workspace)/variables ## to send the VM names to the application/release job
+            artifact: variables
       - job: Database
         pool:
           vmImage: "windows-latest"
@@ -231,7 +236,6 @@ stages:
               publishWebProjects: True
               arguments: "--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)"
               zipAfterPublish: True
-          # Publish the app as an artifact
           - publish: $(Build.StagingDirectory)
             artifact: app
       - job: Release
@@ -243,8 +247,16 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               source: 'current'
-              path: '$(Build.ArtifactStagingDirectory)' 
+              path: $(Build.ArtifactStagingDirectory)
               artifact: app
+          - task: DownloadPipelineArtifact@2 ## to get the VM names from the infrastructure stage
+            inputs:
+              source: 'current'
+              path: $(Build.ArtifactStagingDirectory)
+              artifact: variables
+          - pwsh: |
+              vmNames=$(Get-Content -Path $(Build.ArtifactStagingDirectory)/variables/vmNames)
+              "##vso[task.setvariable variable=vmNames]$vmNames"
           - task: AzureKeyVault@1
             displayName: "Download the VM admin username and password vars"
             inputs:
@@ -258,7 +270,7 @@ stages:
               destination: AzureVMs
               storage: $(storage_account_name)
               resourceGroup: $(azure_resource_group_name)
-              MachineNames: 'VM1,VM2'
+              MachineNames: $(vmNames)
               vmsAdminUserName: $(StandardVmAdminUsername) ## From keyvault
               vmsAdminPassword: $(StandardVmAdminPassword) ## From keyvault
               targetPath: 'C:\inetpub\wwwroot'
