@@ -11,6 +11,10 @@ variables:
     value: "movieapp"
   - name: azure_resource_group_name
     value: "movieapp"
+  - name: keyvault_name
+    value: "MovieApp-KV"
+  - name: storage_account_name
+    value: movieappstorage
   - name: subscription_id
     value: "1427e7fb-a488-4ec5-be44-30ac10ca2e95"
   - name: buildConfiguration
@@ -83,7 +87,7 @@ stages:
               templateLocation: "Linked artifact"
               csmFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/storage.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/storage.params.json"
-              overrideParameters: "-signedExpirySasToken $(signedExpirySasToken)"
+              overrideParameters: "-signedExpirySasToken $(signedExpirySasToken) -storageAccountName $(storage_account_name)"
               deploymentMode: "Incremental"
               deploymentOutputs: storage_arm
           - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(storage_arm)' -MakeOutput -ErrorAction Stop
@@ -100,7 +104,6 @@ stages:
           virtualNetworkName: $[ dependencies.Network.outputs['CreateOutputVariables.virtualNetworkName'] ]
           loadBalancerName: $[ dependencies.Network.outputs['CreateOutputVariables.loadBalancerName'] ]
           loadBalancerBackendPoolName: $[ dependencies.Network.outputs['CreateOutputVariables.loadBalancerBackendPoolName'] ]
-          storageAccountName: $[ dependencies.Storage.outputs['CreateOutputVariables.storageAccountName'] ]
           setupScriptContainerName: $[ dependencies.Storage.outputs['CreateOutputVariables.setupScriptContainerName'] ]
           sasToken: $[ dependencies.Storage.outputs['CreateOutputVariables.sasToken'] ]
           storageAccountKey: $[ dependencies.Storage.outputs['CreateOutputVariables.storageAccountKey'] ]
@@ -121,7 +124,7 @@ stages:
               azureSubscription: "ARM"
               scriptType: "batch"
               scriptLocation: "inlineScript"
-              inlineScript: 'az storage blob upload --container-name $(setupScriptContainerName) --file "$(System.DefaultWorkingDirectory)/infra_build_scripts/iis_setup.zip" --name iis_setup.zip --account-name "$(storageAccountName)" --account-key "$(storageAccountKey)"'
+              inlineScript: 'az storage blob upload --container-name $(setupScriptContainerName) --file "$(System.DefaultWorkingDirectory)/infra_build_scripts/iis_setup.zip" --name iis_setup.zip --account-name "$(storage_account_name)" --account-key "$(storageAccountKey)"'
           - task: AzureResourceManagerTemplateDeployment@3
             name: "Compute"
             inputs:
@@ -133,8 +136,11 @@ stages:
               templateLocation: "Linked artifact"
               csmFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/compute.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/compute.params.json"
-              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -storageAccountName $(storageAccountName) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken)"
+              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -storageAccountName $(storage_account_name) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken)"
               deploymentMode: "Incremental"
+              deploymentOutputs: compute_arm
+          - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(compute_arm)' -ErrorAction Stop
+            name: CreateOutputVariables
       - job: Database
         pool:
           vmImage: "windows-latest"
@@ -160,7 +166,7 @@ stages:
             displayName: "Download SQL key vault variables"
             inputs:
               azureSubscription: 'ARM'
-              KeyVaultName: 'MovieApp-KV'
+              KeyVaultName: $(keyvault_name)
               SecretsFilter: 'SqlAdminUsername,SqlAdminPassword'
           - task: SqlAzureDacpacDeployment@1 ## Build database schema
             inputs:
@@ -202,7 +208,15 @@ stages:
       vmImage: "ubuntu-latest"
     jobs:
       - job: Build
+        variables:
+          sqlServerName: $[ dependencies.Database.outputs['CreateOutputVariables.sqlServerName'] ]
+          sqlDatabaseName: $[ dependencies.Database.outputs['CreateOutputVariables.sqlDatabaseName'] ]
         steps:
+          - pwsh: |
+              $appSettings = Get-Content -Path $(System.DefaultWorkingDirectory)/appsettings.json | ConvertFrom-Json
+              $appSettings.ConnectionStrings.MovieContext = "Server=$($env:sqlServerName);User Id=$($env:SqlAdminPassword);Password=;Database=MoviesDB;Backend=SqlAzure"
+              $appSettings | ConvertTo-Json | Set-Content -Path $(System.DefaultWorkingDirectory)/appsettings.json
+            displayName: "Replace runtime SQL placeholders"
           # Build and publish the application library
           - task: DotNetCoreCLI@2
             displayName: "dotnet build"
@@ -223,18 +237,25 @@ stages:
       - job: Release
         dependsOn: Build
         steps:
-          # Don't clone the repo
           - checkout: none
-
-          # Download the published application artifact
           - download: current
             artifact: app
-  
-        # Release the app
-        # - task: AzureRmWebAppDeployment@4
-        #   inputs:
-        #     ConnectionType: 'AzureRM'
-        #     azureSubscription: 'ARM'
-        #     WebAppName: $(webAppName)
-        #     package: '$(Pipeline.Workspace)/**/*.zip'
-        #     WebAppKind: WebApp
+          - task: AzureKeyVault@1
+            displayName: "Download the VM admin username and password vars"
+            inputs:
+              azureSubscription: 'ARM'
+              KeyVaultName: $(keyvault_name)
+              SecretsFilter: 'StandardVmAdminUsername,StandardVmAdminPassword'
+          - task: AzureFileCopy@4
+            inputs:
+              sourcePath: "$(Build.ArtifactStagingDirectory)/app.zip"
+              azureSubscription: ARM
+              destination: AzureVMs
+              storage: $(storage_account_name)
+              resourceGroup: $(azure_resource_group_name)
+              MachineNames: 'VM1,VM2'
+              vmsAdminUserName: $(StandardVmAdminUsername) ## From keyvault
+              vmsAdminPassword: $(StandardVmAdminPassword) ## From keyvault
+              targetPath: 'C:\inetpub\wwwroot'
+              copyFilesInParallel: true
+              cleanTargetBeforeCopy: true

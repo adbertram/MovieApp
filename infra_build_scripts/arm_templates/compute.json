@@ -211,6 +211,9 @@
         }
     ],
     "outputs": {
-
+        "subnetName": {
+            "value": "[variables('vmNames').loop[copyIndex()].name]",
+            "type": "array"
+        }
     }
 }
