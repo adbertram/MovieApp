@@ -245,17 +245,19 @@ stages:
         steps:
           - checkout: none
           - task: DownloadPipelineArtifact@2
+            displayName: "Download the app published in the Build job."
             inputs:
               source: 'current'
               path: $(Build.ArtifactStagingDirectory)
               artifact: app
           - task: DownloadPipelineArtifact@2 ## to get the VM names from the infrastructure stage
+            displayName: "Download the variables created in the infrastrsucture stage."
             inputs:
               source: 'current'
               path: $(Build.ArtifactStagingDirectory)
               artifact: variables
           - pwsh: | ## Create the vars to provide to the Azure file copy task
-              vmNames=$(Get-Content -Path $(Build.ArtifactStagingDirectory)/variables/vmNames)
+              $vmNames=$(Get-Content -Path "$(Build.ArtifactStagingDirectory)\variables\vmNames")
               "##vso[task.setvariable variable=vmNames]$vmNames"
           - task: AzureKeyVault@1
             displayName: "Download the VM admin username and password vars"
