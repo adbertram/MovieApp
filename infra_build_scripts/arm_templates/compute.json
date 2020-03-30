@@ -212,7 +212,7 @@
     ],
     "outputs": {
         "vmNames": {
-            "value": "[variables('vmNames').loop[copyIndex()].name]",
+            "value": "[variables('vmNames').loop]",
             "type": "array"
         }
     }
