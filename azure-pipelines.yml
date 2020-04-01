@@ -259,17 +259,13 @@ stages:
               path: $(Build.ArtifactStagingDirectory)
               artifact: variables
           - pwsh: | ## Create the vars to provide to the Azure file copy task
-              try {
               $ErrorActionPreference = 'Stop'
-              if (-not (Test-Path -Path "$(Pipeline.Workspace)\variables\vmNames")) {
+              if (-not (Test-Path -Path "$(Build.ArtifactStagingDirectory)\vmNames")) {
                 throw "vmNames variable file does not exist!"
               }
-              $vmNames=Get-Content -Path "$(Pipeline.Workspace)\variables\vmNames" -Raw
+              $vmNames=Get-Content -Path "$(Build.ArtifactStagingDirectory)\vmNames" -Raw
               Write-Output "VmNames var is [$vmNames]"
               "##vso[task.setvariable variable=vmNames]$vmNames"
-              } catch {
-                write-output $_.Exception.Message
-              }
           - task: AzureKeyVault@1
             displayName: "Download the VM admin username and password vars"
             inputs:
