@@ -271,13 +271,10 @@ stages:
               azureSubscription: 'ARM'
               KeyVaultName: $(keyvault_name)
               SecretsFilter: 'StandardVmAdminUsername,StandardVmAdminPassword'
-          - pwsh: |
-              Test-Path -Path "$(Build.ArtifactStagingDirectory)\app.zip"
-              Get-ChildItem -Path "$(Build.ArtifactStagingDirectory)"
           - task: AzureFileCopy@4
             displayName: "Copy the application to the VMs."
             inputs:
-              sourcePath: $(Build.ArtifactStagingDirectory)\app.zip
+              sourcePath: $(Build.ArtifactStagingDirectory)\s.zip
               azureSubscription: ARM
               destination: AzureVMs
               storage: $(storage_account_name) ## temp location as an intermediary to transfer files to VMs
