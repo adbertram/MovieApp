@@ -142,8 +142,10 @@ stages:
           - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(compute_arm)' -ErrorAction Stop
             name: CreateOutputVariables
           - pwsh: |
-              mkdir "$(Pipeline.Workspace)/variables"
-              echo $env:vmNames > $(Pipeline.Workspace)/variables/vmNames
+              $null = mkdir "$(Pipeline.Workspace)/variables"
+              $varFilePath = "$(Pipeline.Workspace)/variables/vmNames"
+              Write-Output "Writing [$env:vmNames] to [$varFilePath]..."
+              Set-Content -Path $varFilePath -Value $env:vmNames
           - publish: $(Pipeline.Workspace)/variables ## to send the VM names to the application/release job
             artifact: variables
       - job: Database
@@ -257,6 +259,8 @@ stages:
               path: $(Build.ArtifactStagingDirectory)
               artifact: variables
           - pwsh: | ## Create the vars to provide to the Azure file copy task
+              $ErrorActionPreference = 'Stop'
+              Test-Path -Path "$(Build.ArtifactStagingDirectory)\variables\vmNames"
               $vmNames=$(Get-Content -Path "$(Build.ArtifactStagingDirectory)\variables\vmNames")
               "##vso[task.setvariable variable=vmNames]$vmNames"
           - task: AzureKeyVault@1
@@ -266,6 +270,7 @@ stages:
               KeyVaultName: $(keyvault_name)
               SecretsFilter: 'StandardVmAdminUsername,StandardVmAdminPassword'
           - task: AzureFileCopy@4
+            displayName: "Copy the application to the VMs."
             inputs:
               sourcePath: $(Build.ArtifactStagingDirectory)\app.zip
               azureSubscription: ARM
