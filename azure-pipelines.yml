@@ -262,7 +262,8 @@ stages:
               if (-not (Test-Path -Path ""$(Pipeline.Workspace)\variables\vmNames")) {
                 throw "vmNames variable file does not exist!"
               }
-              $vmNames=$(Get-Content -Path "$(Pipeline.Workspace)\variables\vmNames")
+              $vmNames=$(Get-Content -Path "$(Pipeline.Workspace)\variables\vmNames") -Raw
+              Write-Output "VmNames var is [$vmNames]"
               "##vso[task.setvariable variable=vmNames]$vmNames"
           - task: AzureKeyVault@1
             displayName: "Download the VM admin username and password vars"
