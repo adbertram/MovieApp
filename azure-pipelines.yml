@@ -143,7 +143,7 @@ stages:
             name: CreateOutputVariables
           - pwsh: |
               $null = mkdir "$(Pipeline.Workspace)/variables"
-              $varFilePath = "$(Pipeline.Workspace)/variables/vmNames"
+              $varFilePath = "$(Pipeline.Workspace)\variables\vmNames"
               Write-Output "Writing [$env:vmNames] to [$varFilePath]..."
               Set-Content -Path $varFilePath -Value $env:vmNames
           - publish: $(Pipeline.Workspace)/variables ## to send the VM names to the application/release job
@@ -259,9 +259,10 @@ stages:
               path: $(Build.ArtifactStagingDirectory)
               artifact: variables
           - pwsh: | ## Create the vars to provide to the Azure file copy task
-              $ErrorActionPreference = 'Stop'
-              Test-Path -Path "$(Build.ArtifactStagingDirectory)\variables\vmNames"
-              $vmNames=$(Get-Content -Path "$(Build.ArtifactStagingDirectory)\variables\vmNames")
+              if (-not (Test-Path -Path ""$(Pipeline.Workspace)\variables\vmNames")) {
+                throw "vmNames variable file does not exist!"
+              }
+              $vmNames=$(Get-Content -Path "$(Pipeline.Workspace)\variables\vmNames")
               "##vso[task.setvariable variable=vmNames]$vmNames"
           - task: AzureKeyVault@1
             displayName: "Download the VM admin username and password vars"
