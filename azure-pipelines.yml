@@ -16,11 +16,11 @@ variables:
   - name: storage_account_name
     value: movieappstorage
   - name: subscription_id
-    value: "1427e7fb-a488-4ec5-be44-30ac10ca2e95"
+    value: "1427e7fb-a488-4ec5-be44-30ac10ca2e95" ## Change this
   - name: buildConfiguration
     value: "Release"
   - name: AzDoAccountName
-    value: "adbertram"
+    value: "adbertram" ## Change this
   - name: AzDoProjectName
     value: "MovieApp"
   - name: AzDoDeploymentGroupName
