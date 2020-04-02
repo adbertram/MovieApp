@@ -220,7 +220,7 @@
                     }
                 },
                 {
-                    "name": "[variables('vmNames').loop[copyIndex()].name]",
+                    "name": "PiplineAgent",
                     "type": "extensions",
                     "location": "[resourceGroup().location]",
                     "apiVersion": "2019-07-01",
