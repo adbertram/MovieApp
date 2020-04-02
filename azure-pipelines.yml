@@ -19,12 +19,6 @@ variables:
     value: "1427e7fb-a488-4ec5-be44-30ac10ca2e95" ## Change this
   - name: buildConfiguration
     value: "Release"
-  - name: AzDoAccountName
-    value: "adbertram" ## Change this
-  - name: AzDoProjectName
-    value: "MovieApp"
-  - name: AzDoDeploymentGroupName
-    value: "AppServers"
 
 stages:
   - stage: "Infrastructure"
@@ -131,12 +125,6 @@ stages:
               scriptType: "batch"
               scriptLocation: "inlineScript"
               inlineScript: 'az storage blob upload --container-name $(setupScriptContainerName) --file "$(System.DefaultWorkingDirectory)/infra_build_scripts/iis_setup.zip" --name iis_setup.zip --account-name "$(storage_account_name)" --account-key "$(storageAccountKey)"'
-          - task: AzureKeyVault@1
-            displayName: "Download the AzDo PAT token to pass to ARM template"
-            inputs:
-              azureSubscription: 'ARM'
-              KeyVaultName: $(keyvault_name)
-              SecretsFilter: 'AzDoPAT'
           - task: AzureResourceManagerTemplateDeployment@3
             name: "Compute"
             inputs:
@@ -148,7 +136,7 @@ stages:
               templateLocation: "Linked artifact"
               csmFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/compute.json"
               csmParametersFile: "$(System.DefaultWorkingDirectory)/infra_build_scripts/arm_templates/compute.params.json"
-              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -storageAccountName $(storage_account_name) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken) -azDoAccountName $(azDoAccountName) -azDoProjectName $(azDoProjectName) -azDoDeploymentGroupName $(azDoDeploymentGroupName) -azDoPatToken $(AzDoPAT)"
+              overrideParameters: "-subnetName $(subnetName) -virtualNetworkName $(virtualNetworkName) -loadBalancerName $(loadBalancerName) -loadBalancerBackendPoolName $(loadBalancerBackendPoolName) -storageAccountName $(storage_account_name) -setupScriptContainerName $(setupScriptContainerName) -sasToken $(sasToken)"
               deploymentMode: "Incremental"
               deploymentOutputs: compute_arm
           - pwsh: $(System.DefaultWorkingDirectory)/infra_build_scripts/parse_arm_deployment_output.ps1 -ArmOutputString '$(compute_arm)' -ErrorAction Stop

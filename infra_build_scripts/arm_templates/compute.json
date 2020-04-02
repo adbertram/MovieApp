@@ -8,18 +8,6 @@
         "adminPassword": {
             "type": "securestring"
         },
-        "azDoAccountName": {
-            "type": "string"
-        },
-        "azDoProjectName": {
-            "type": "string"
-        },
-        "azDoDeploymentGroupName": {
-            "type": "string"
-        },
-        "azDoPatToken": {
-            "type": "string"
-        },
         "vmSize": {
             "type": "string",
             "allowedValues": [
@@ -216,29 +204,6 @@
                         },
                         "protectedSettings": {
                             "configurationUrlSasToken": "[parameters('sasToken')]"
-                        }
-                    }
-                },
-                {
-                    "name": "PiplineAgent",
-                    "type": "extensions",
-                    "location": "[resourceGroup().location]",
-                    "apiVersion": "2019-07-01",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Compute/virtualMachines/',variables('vmNames').loop[copyIndex()].name)]"
-                    ],
-                    "properties": {
-                        "publisher": "Microsoft.VisualStudio.Services",
-                        "type": "TeamServicesAgent",
-                        "typeHandlerVersion": "1.0",
-                        "autoUpgradeMinorVersion": true,
-                        "settings": {
-                            "VSTSAccountName": "[parameters('azDoAccountName')]",
-                            "TeamProject": "[parameters('azDoProjectName')]",
-                            "DeploymentGroup": "[parameters('azDoDeploymentGroupName')]"
-                        },
-                        "protectedSettings": {
-                            "PATToken": "[parameters('azDoPatToken')]"
                         }
                     }
                 }
