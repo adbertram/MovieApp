@@ -42,6 +42,18 @@
                 "secretName": "StandardVmAdminPassword"
             }
         },
+        "azDoAccountName": {
+            "value": ""
+        },
+        "azDoProjectName": {
+            "value": ""
+        },
+        "azDoDeploymentGroupName": {
+            "value": ""
+        },
+        "azDoProjectPatToken": {
+            "value": ""
+        },
         "storageAccountName": {
             "value": ""
         },

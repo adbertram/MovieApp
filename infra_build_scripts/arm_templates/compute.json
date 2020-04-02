@@ -8,6 +8,18 @@
         "adminPassword": {
             "type": "securestring"
         },
+        "azDoAccountName": {
+            "type": "string"
+        },
+        "azDoProjectName": {
+            "type": "string"
+        },
+        "azDoDeploymentGroupName": {
+            "type": "string"
+        },
+        "azDoProjectPatToken": {
+            "type": "string"
+        },
         "vmSize": {
             "type": "string",
             "allowedValues": [
@@ -204,6 +216,29 @@
                         },
                         "protectedSettings": {
                             "configurationUrlSasToken": "[parameters('sasToken')]"
+                        }
+                    }
+                },
+                {
+                    "name": "[variables('vmNames').loop[copyIndex()].name]",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "location": "[resourceGroup().location]",
+                    "apiVersion": "2015-06-15",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Compute/virtualMachines/',variables('vmNames').loop[copyIndex()].name)]"
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.VisualStudio.Services",
+                        "type": "TeamServicesAgent",
+                        "typeHandlerVersion": "1.0",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "VSTSAccountName": "[parameters('azDoAccountName')]",
+                            "TeamProject": "[parameters('azDoProjectName')]",
+                            "DeploymentGroup": "[parameters('azDoDeploymentGroupName')]"
+                        },
+                        "protectedSettings": {
+                            "PATToken": "[parameters('azDoProjectPatToken')]"
                         }
                     }
                 }
