@@ -54,6 +54,16 @@
                     ]
                 }
             ]
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "name": "8344ecf7-0f66-40f4-b8ba-6d4ab62c6193",
+            "apiVersion": "2018-09-01-preview",
+            "properties": {
+                "roleDefinitionId": "ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+                "principalId": "[resourceId('Microsoft.Storage/storageAccounts',parameters('storageAccountName'))]",
+                "scope": "[resourceGroup().Id]"
+            }
         }
     ],
     "outputs": {
