@@ -51,7 +51,7 @@
         "azDoDeploymentGroupName": {
             "value": ""
         },
-        "azDoProjectPatToken": {
+        "azDoPatToken": {
             "value": ""
         },
         "storageAccountName": {

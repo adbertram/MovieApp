@@ -17,7 +17,7 @@
         "azDoDeploymentGroupName": {
             "type": "string"
         },
-        "azDoProjectPatToken": {
+        "azDoPatToken": {
             "type": "string"
         },
         "vmSize": {
@@ -238,7 +238,7 @@
                             "DeploymentGroup": "[parameters('azDoDeploymentGroupName')]"
                         },
                         "protectedSettings": {
-                            "PATToken": "[parameters('azDoProjectPatToken')]"
+                            "PATToken": "[parameters('azDoPatToken')]"
                         }
                     }
                 }
