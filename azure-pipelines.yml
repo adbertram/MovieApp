@@ -271,22 +271,11 @@ stages:
               azureSubscription: 'ARM'
               KeyVaultName: $(keyvault_name)
               SecretsFilter: 'StandardVmAdminUsername,StandardVmAdminPassword'
-          - task: AzureFileCopy@4
-            displayName: "Copy the application to the VMs."
+          - task: WindowsMachineFileCopy@2 ## It'd be better to use a deployment group here but it's not supported in YAML pipelines
             inputs:
-              sourcePath: $(Build.ArtifactStagingDirectory)\s.zip
-              ## Enabling this option configures Windows Remote Management (WinRM) listener over HTTPS protocol on
-              ## port 5986, using a self-signed certificate. This configuration is required for performing copy operation
-              ## on Azure machines. If the target Virtual Machines are backed by a Load balancer, ensure Inbound NAT rules
-              ## are configured for target port (5986). Applicable only for ARM VMs.
-              enableCopyPrerequisites: true ## Required for Azure VMs
-              azureSubscription: ARM
-              destination: AzureVMs
-              storage: $(storage_account_name) ## temp location as an intermediary to transfer files to VMs
-              resourceGroup: $(azure_resource_group_name)
+              SourcePath: $(Build.ArtifactStagingDirectory)\s.zip
               MachineNames: $(vmNames) ## vmNames from Compute job in Infrastructure stage
-              vmsAdminUserName: $(StandardVmAdminUsername) ## From keyvault
-              vmsAdminPassword: $(StandardVmAdminPassword) ## From keyvault
-              targetPath: 'C:\inetpub\wwwroot'
-              copyFilesInParallel: true
-              cleanTargetBeforeCopy: true
+              AdminUserName: $(StandardVmAdminUsername) ## From keyvault
+              AdminPassword: $(StandardVmAdminPassword) ## From keyvault
+              TargetPath: 'C:\inetpub\wwwroot'
+              CleanTargetBeforeCopy: true
