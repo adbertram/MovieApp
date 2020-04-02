@@ -277,5 +277,5 @@ stages:
               MachineNames: $(vmNames) ## vmNames from Compute job in Infrastructure stage
               AdminUserName: $(StandardVmAdminUsername) ## From keyvault
               AdminPassword: $(StandardVmAdminPassword) ## From keyvault
-              TargetPath: 'C:\inetpub\wwwroot'
+              TargetPath: 'C:\'
               CleanTargetBeforeCopy: true
