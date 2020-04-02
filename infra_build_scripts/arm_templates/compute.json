@@ -221,7 +221,7 @@
                 },
                 {
                     "name": "[variables('vmNames').loop[copyIndex()].name]",
-                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "type": "extensions",
                     "location": "[resourceGroup().location]",
                     "apiVersion": "2015-06-15",
                     "dependsOn": [
