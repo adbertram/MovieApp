@@ -16,7 +16,7 @@ variables:
   verMajor: 0
   verMinor: 0
   verPatch: $(Build.BuildID)
-  buildVer: $(verMajor).$(verMinor).$(verPath)
+  buildVer: $(verMajor).$(verMinor).$(verPatch)
   azDoOrgName: adbertram ## Change this.
 
 stages:
@@ -224,6 +224,7 @@ stages:
               $appSettings | ConvertTo-Json | Set-Content -Path $(System.DefaultWorkingDirectory)/appsettings.json
             displayName: "Replace runtime SQL placeholders"
           - task: NuGetCommand@2
+            displayName: Create NuGet package
             inputs:
               command: 'pack'
               packagesToPack: '**/*.csproj'
