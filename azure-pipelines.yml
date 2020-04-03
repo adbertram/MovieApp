@@ -230,6 +230,7 @@ stages:
               packagesToPack: '**/*.csproj'
               versioningScheme: 'byEnvVar'
               versionEnvVar: 'buildVer'
+              buildProperties: 'VERSIONHERE=$(buildVer)'
           # Build and publish the application library
           # - task: DotNetCoreCLI@2
           #   displayName: "dotnet build"
