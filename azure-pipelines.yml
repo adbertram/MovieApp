@@ -7,18 +7,17 @@ trigger:
       - infra_build_scripts/*
 
 variables:
-  - name: project_name
-    value: "movieapp"
-  - name: azure_resource_group_name
-    value: "movieapp"
-  - name: keyvault_name
-    value: "MovieApp-KV"
-  - name: storage_account_name
-    value: movieappstorage
-  - name: subscription_id
-    value: "1427e7fb-a488-4ec5-be44-30ac10ca2e95" ## Change this
-  - name: buildConfiguration
-    value: "Release"
+  project_name: MovieApp
+  azure_resource_group_name: "movieapp"
+  keyvault_name: "MovieApp-KV"
+  storage_account_name: movieappstorage
+  buildConfiguration: "Release"
+  subscription_id: "1427e7fb-a488-4ec5-be44-30ac10ca2e95" ## change this
+  verMajor: 0
+  verMinor: 0
+  verPatch: $(Build.BuildID)
+  buildVer: $(verMajor).$(verMinor).$(verPath)
+  azDoOrgName: adbertram ## Change this.
 
 stages:
   - stage: "Infrastructure"
@@ -224,22 +223,28 @@ stages:
               $appSettings.ConnectionStrings.MovieContext = "Server=$($env:sqlServerName);User Id=$($env:SqlAdminPassword);Password=;Database=MoviesDB;Backend=SqlAzure"
               $appSettings | ConvertTo-Json | Set-Content -Path $(System.DefaultWorkingDirectory)/appsettings.json
             displayName: "Replace runtime SQL placeholders"
+          - task: NuGetCommand@2
+            inputs:
+              command: 'pack'
+              packagesToPack: '**/*.csproj'
+              versioningScheme: 'byEnvVar'
+              versionEnvVar: 'buildVer'
           # Build and publish the application library
-          - task: DotNetCoreCLI@2
-            displayName: "dotnet build"
-            inputs:
-              command: build
-              projects: "*.csproj"
-              arguments: "--configuration $(buildConfiguration)"
-          - task: DotNetCoreCLI@2
-            displayName: "dotnet publish"
-            inputs:
-              command: publish
-              publishWebProjects: True
-              arguments: "--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)"
-              zipAfterPublish: True
+          # - task: DotNetCoreCLI@2
+          #   displayName: "dotnet build"
+          #   inputs:
+          #     command: build
+          #     projects: "*.csproj"
+          #     arguments: "--configuration $(buildConfiguration)"
+          # - task: DotNetCoreCLI@2
+          #   displayName: "dotnet publish"
+          #   inputs:
+          #     command: publish
+          #     publishWebProjects: True
+          #     arguments: "--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)"
+          #     zipAfterPublish: True
           - publish: $(Build.StagingDirectory)
-            artifact: app
+            artifact: NuGetPackage
       - job: Release
         dependsOn: Build
         pool:
@@ -247,35 +252,53 @@ stages:
         steps:
           - checkout: none
           - task: DownloadPipelineArtifact@2
-            displayName: "Download the app published in the Build job."
+            displayName: "Download the package published in the Build job."
             inputs:
               source: 'current'
               path: $(Build.ArtifactStagingDirectory)
-              artifact: app
+              artifact: NugetPackage
           - task: DownloadPipelineArtifact@2 ## to get the VM names from the infrastructure stage
             displayName: "Download the variables created in the infrastrsucture stage."
             inputs:
               source: 'current'
               path: $(Build.ArtifactStagingDirectory)
               artifact: variables
-          - pwsh: | ## Create the vars to provide to the Azure file copy task
+          - pwsh: |
               $ErrorActionPreference = 'Stop'
               if (-not (Test-Path -Path "$(Build.ArtifactStagingDirectory)\vmNames")) {
                 throw "vmNames variable file does not exist!"
               }
               $vmNames=Get-Content -Path "$(Build.ArtifactStagingDirectory)\vmNames" -Raw
               "##vso[task.setvariable variable=vmNames]$vmNames"
-          - task: AzureKeyVault@1
-            displayName: "Download the VM admin username and password vars"
+          - task: NuGetCommand@2
             inputs:
-              azureSubscription: 'ARM'
-              KeyVaultName: $(keyvault_name)
-              SecretsFilter: 'StandardVmAdminUsername,StandardVmAdminPassword'
-          - task: WindowsMachineFileCopy@2 ## It'd be better to use a deployment group here but it's not supported in YAML pipelines
-            inputs:
-              SourcePath: $(Build.ArtifactStagingDirectory)\s.zip
-              MachineNames: $(vmNames) ## vmNames from Compute job in Infrastructure stage
-              AdminUserName: $(StandardVmAdminUsername) ## From keyvault
-              AdminPassword: $(StandardVmAdminPassword) ## From keyvault
-              TargetPath: 'C:\'
-              CleanTargetBeforeCopy: true
+              command: 'push'
+              packagesToPush: '$(Build.StagingDirectory)/**/*.nupkg'
+              nuGetFeedType: 'internal'
+              publishVstsFeed: $(azDoOrgName)
+          # - task: AzureKeyVault@1
+          #   displayName: "Download the VM admin username and password vars"
+          #   inputs:
+          #     azureSubscription: 'ARM'
+          #     KeyVaultName: $(keyvault_name)
+          #     SecretsFilter: 'StandardVmAdminUsername,StandardVmAdminPassword'
+         
+          #           - task: AzureFileCopy@4 ## It'd be better to use a deployment group here but it's not supported in YAML pipelines
+          #             displayName: "Copy the application to the VMs."
+          #             inputs:
+          #     sourcePath: $(Build.ArtifactStagingDirectory)\s.zip
+              ## Enabling this option configures Windows Remote Management (WinRM) listener over HTTPS protocol on
+              ## port 5986, using a self-signed certificate. This configuration is required for performing copy operation
+              ## on Azure machines. If the target Virtual Machines are backed by a Load balancer, ensure Inbound NAT rules
+              ## are configured for target port (5986). Applicable only for ARM VMs.
+              # enableCopyPrerequisites: true ## Required for Azure VMs
+              # azureSubscription: ARM
+              # destination: AzureVMs
+              # storage: $(storage_account_name) ## temp location as an intermediary to transfer files to VMs
+              # resourceGroup: $(azure_resource_group_name)
+              # MachineNames: 
+              # vmsAdminUserName: 
+              # vmsAdminPassword: 
+              # targetPath: 'C:\inetpub\wwwroot'
+              # copyFilesInParallel: true
+              # cleanTargetBeforeCopy: true
