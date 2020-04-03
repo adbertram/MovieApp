@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-    <PackageId>MovieApp</PackageId>
-    <Version>$VERSIONHERE$</Version>
-    <Authors>Adam Bertram</Authors>
-    <Company>Adam the Automator, LLC</Company>
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
         <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+        <!-- The following four lines are for NuGet packaging ('nuget pack' command) -->
+        <PackageId>MovieApp</PackageId>
+        <Version>$VERSIONHERE$</Version>
+        <Authors>Adam Bertram</Authors>
+        <Company>Adam the Automator, LLC</Company>
+        <!-- <GeneratePackageOnBuild>true</GeneratePackageOnBuild> Could use this here to automatically build but replacing in pipeline instead. -->
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.App" />
