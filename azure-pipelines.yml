@@ -7,10 +7,10 @@ trigger:
       - infra_build_scripts/*
 
 variables:
-  project_name: MovieApp
-  azure_resource_group_name: "movieapp"
-  keyvault_name: "MovieApp-KV"
-  storage_account_name: movieappstorage
+  project_name: movieapp
+  azure_resource_group_name: $(project_name)
+  keyvault_name: "$(project_name)-KV"
+  storage_account_name: "$(project_name)storage"
   buildConfiguration: "Release"
   subscription_id: "1427e7fb-a488-4ec5-be44-30ac10ca2e95" ## change this
   verMajor: 0
