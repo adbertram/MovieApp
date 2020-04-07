@@ -206,6 +206,28 @@
                             "configurationUrlSasToken": "[parameters('sasToken')]"
                         }
                     }
+                },
+                {
+                    "type": "extensions",
+                    "name": "WinRMCustomScriptExtension",
+                    "apiVersion": "2019-07-01",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Compute/virtualMachines',variables('vmNames').loop[copyIndex()].name)]"
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.Compute",
+                        "type": "CustomScriptExtension",
+                        "typeHandlerVersion": "1.4",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "fileUris": [
+                                "https://raw.githubusercontent.com/adbertram/MovieApp/master/infra_build_scripts/configure_winrm.ps1",
+                                "https://github.com/adbertram/MovieApp/raw/master/infra_build_scripts/makecert.exe"
+                            ],
+                            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file configure_winrm.ps1 ',concat('*.',resourceGroup().location,'.cloudapp.azure.com'))]"
+                        }
+                    }
                 }
             ]
         }
