@@ -173,14 +173,14 @@ stages:
             inputs:
               azureSubscription: 'ARM'
               KeyVaultName: $(keyvault_name)
-              SecretsFilter: 'SqlAdminUsername,SqlAdminPassword'
+              SecretsFilter: 'SqlAdminUsername1,SqlAdminPassword'
           - task: SqlAzureDacpacDeployment@1 ## Build database schema
             inputs:
               azureSubscription: 'ARM'
               AuthenticationType: 'server'
               DatabaseName: "$(databaseName)" ## From database ARM deployment
               ServerName: "$(sqlServerName)" ## From database ARM deployment
-              SqlUsername: "$(SqlAdminUsername)" ## From keyvault
+              SqlUsername: "$(SqlAdminUsername1)" ## From keyvault
               SqlPassword: "$(SqlAdminPassword)" ## From keyvault
               deployType: 'SqlTask'
               SqlFile: '$(System.DefaultWorkingDirectory)/infra_build_scripts/MovieSchema.sql'
