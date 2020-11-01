@@ -11,7 +11,7 @@
         "adminUsername": {
             "reference": {
                 "keyVault": {
-                    "id": "/subscriptions/1427e7fb-a488-4ec5-be44-30ac10ca2e95/resourceGroups/MovieApp/providers/Microsoft.KeyVault/vaults/movieapp-KV"
+                    "id": "/subscriptions/1427e7fb-a488-4ec5-be44-30ac10ca2e95/resourceGroups/Pluralsight-MSDevOpsSolutionsScirptsCourse/providers/Microsoft.KeyVault/vaults/movieapp-KV"
                 },
                 "secretName": "SqlAdminUsername1"
             }
@@ -19,7 +19,7 @@
         "adminPassword": {
             "reference": {
                 "keyVault": {
-                    "id": "/subscriptions/1427e7fb-a488-4ec5-be44-30ac10ca2e95/resourceGroups/MovieApp/providers/Microsoft.KeyVault/vaults/movieapp-KV"
+                    "id": "/subscriptions/1427e7fb-a488-4ec5-be44-30ac10ca2e95/resourceGroups/Pluralsight-MSDevOpsSolutionsScirptsCourse/providers/Microsoft.KeyVault/vaults/movieapp-KV"
                 },
                 "secretName": "SqlAdminPassword"
             }
